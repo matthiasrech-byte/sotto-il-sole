@@ -1,0 +1,223 @@
+---
+import { urlFor } from '../lib/sanityImage';
+
+interface Product {
+  name: string;
+  category?: string;
+  packSize?: string;
+  shortDescription?: string;
+}
+
+interface SanityImage {
+  asset?: {
+    _ref?: string;
+    _type?: string;
+  };
+}
+
+interface Brand {
+  name: string;
+  region?: string;
+  shortDescription?: string;
+  heroImage?: SanityImage;
+  products?: Product[];
+}
+
+interface Props {
+  brands: Brand[];
+}
+
+const { brands } = Astro.props;
+---
+
+<section class="section brands" id="marken">
+  <div class="container">
+    <p class="section__eyebrow">Unsere Marken</p>
+    <h2 class="section__title">Handel beginnt mit Vertrauen.</h2>
+    <p class="section__intro">
+      Wir arbeiten mit ausgewählten italienischen Herstellern zusammen, die wir persönlich kennen: kleine Familienbetriebe mit eigener Geschichte, regionaler Verwurzelung und einem klaren Anspruch an Qualität.
+    </p>
+
+    <div class="brands__grid">
+      {brands.map((brand) => (
+        <article class="brand-card">
+          <div class="brand-card__media">
+  {brand.heroImage && (
+    <img
+      class="brand-card__image"
+      src={urlFor(brand.heroImage).width(1000).height(650).fit('crop').url()}
+      alt={brand.name}
+      loading="lazy"
+    />
+  )}
+</div>
+
+          <div class="brand-card__top">
+            {brand.region && <p class="brand-card__region">{brand.region}</p>}
+            <h3>{brand.name}</h3>
+            {brand.shortDescription && <p>{brand.shortDescription}</p>}
+          </div>
+
+          <div class="brand-card__products">
+            <p>Produkte</p>
+            <ul>
+              {(brand.products || []).map((product) => (
+          <li>
+  <strong>{product.name}</strong>
+
+  {(product.category || product.packSize) && (
+    <span class="product-meta">
+      {[product.category, product.packSize].filter(Boolean).join(' · ')}
+    </span>
+  )}
+
+  {product.shortDescription && (
+    <p class="product-description">{product.shortDescription}</p>
+  )}
+</li>
+              ))}
+            </ul>
+          </div>
+        </article>
+      ))}
+    </div>
+  </div>
+</section>
+
+<style>
+  .brands {
+    background: var(--color-green-dark);
+    color: var(--color-sand);
+  }
+
+  .brands .section__eyebrow {
+    color: rgba(222, 218, 213, 0.72);
+  }
+
+  .brands__grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1rem;
+    margin-top: 3rem;
+  }
+
+  brand-card {
+    min-height: 420px;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    border: 1px solid rgba(222, 218, 213, 0.2);
+    border-radius: 28px;
+    background: rgba(222, 218, 213, 0.06);
+  }
+ 
+  .brand-card__media {
+    width: 100%;
+    aspect-ratio: 16 / 10;
+    background: rgba(222, 218, 213, 0.12);
+    overflow: hidden;
+    flex-shrink: 0;
+  }
+
+  .brand-card__image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  .brand-card__top {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 1.45rem 1.35rem 0;
+  }
+
+  .brand-card__region {
+    display: inline-flex;
+    width: fit-content;
+    margin: 0 0 1.1rem;
+    border-radius: 999px;
+    padding: 0.4rem 0.7rem;
+    background: var(--color-orange);
+    color: white;
+    font-size: 0.72rem;
+    font-weight: 900;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .brand-card h3 {
+    margin: 0;
+    font-family: var(--font-serif);
+    font-size: clamp(2rem, 4vw, 3.25rem);
+    line-height: 1.02;
+    letter-spacing: -0.04em;
+  }
+
+  .brand-card p {
+    line-height: 1.6;
+  }
+
+  .brand-card__top > p:not(.brand-card__region) {
+    margin-top: 1rem;
+    margin-bottom: 0;
+    color: rgba(222, 218, 213, 0.82);
+  }
+
+     .brand-card__products {
+    margin: 2.25rem 1.35rem 1.35rem;
+    border-top: 1px solid rgba(222, 218, 213, 0.14);
+    padding-top: 1.15rem;
+  }
+
+  .brand-card__products > p {
+    margin: 0 0 0.75rem;
+    color: rgba(222, 218, 213, 0.7);
+    font-size: 0.78rem;
+    font-weight: 900;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+  }
+
+    .brand-card__products ul {
+    display: grid;
+    gap: 0.45rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .brand-card__products li {
+    border: 1px solid rgba(222, 218, 213, 0.14);
+    border-radius: 16px;
+    padding: 0.7rem 0.8rem;
+    background: rgba(222, 218, 213, 0.04);
+    font-size: 0.92rem;
+  }
+
+  .brand-card__products strong {
+    display: block;
+  }
+
+  .product-meta {
+    display: block;
+    margin-top: 0.25rem;
+    color: rgba(222, 218, 213, 0.66);
+    font-size: 0.82rem;
+    line-height: 1.4;
+  }
+
+  .product-description {
+    margin: 0.55rem 0 0;
+    color: rgba(222, 218, 213, 0.82);
+    font-size: 0.9rem;
+    line-height: 1.5;
+  }
+
+  @media (max-width: 820px) {
+    .brands__grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

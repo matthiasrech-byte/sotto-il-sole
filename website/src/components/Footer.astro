@@ -1,0 +1,48 @@
+<footer class="footer">
+  <div class="container footer__inner">
+    <p>SOTTO IL SOLE</p>
+    <nav aria-label="Rechtliches">
+      <a href="/impressum">Impressum</a>
+      <a href="/datenschutz">Datenschutz</a>
+    </nav>
+  </div>
+</footer>
+
+<style>
+  .footer {
+    padding: 2rem 1.5rem;
+    background: var(--color-green-dark);
+    color: var(--color-sand);
+  }
+
+  .footer__inner {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+  }
+
+  .footer p {
+    margin: 0;
+    font-weight: 900;
+    letter-spacing: 0.14em;
+  }
+
+  .footer nav {
+    display: flex;
+    gap: 1rem;
+  }
+
+  .footer a {
+    text-decoration: none;
+  }
+
+  .footer a:hover {
+    color: var(--color-orange);
+  }
+
+  @media (max-width: 640px) {
+    .footer__inner {
+      flex-direction: column;
+    }
+  }
+</style>

@@ -1,0 +1,105 @@
+---
+import { urlFor } from '../lib/sanityImage';
+
+interface SanityImage {
+  asset?: {
+    _ref?: string;
+    _type?: string;
+  };
+}
+
+interface Props {
+  about: {
+    headline?: string;
+    intro?: string;
+    quote?: string;
+    portrait?: SanityImage;
+  };
+}
+
+const { about } = Astro.props;
+---
+
+<section class="section about" id="ueber-uns">
+  <div class="container about__grid">
+    {about.portrait && (
+      <div class="about__media">
+        <img
+          class="about__image"
+          src={urlFor(about.portrait).width(1000).height(650).fit('crop').url()}
+          alt="SOTTO IL SOLE"
+          loading="lazy"
+        />
+      </div>
+    )}
+
+    <div class="about__content">
+      <p class="section__eyebrow">Über uns</p>
+      <h2 class="section__title">{about.headline || 'Mit Gespür für Qualität und Herkunft.'}</h2>
+
+      <div class="about__text">
+        <p>{about.intro}</p>
+        <p>
+          Unsere Gründerin verbindet Liebe zu Italien mit einem klaren Anspruch an Qualität, Verlässlichkeit und partnerschaftliche Zusammenarbeit mit Händlern.
+        </p>
+        {about.quote && <blockquote>„{about.quote}“</blockquote>}
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .about {
+    background: var(--color-sand);
+  }
+
+  .about__grid {
+    display: grid;
+    grid-template-columns: 1fr 0.8fr;
+    gap: clamp(2rem, 6vw, 5rem);
+    align-items: start;
+  }
+
+  .about__content {
+    min-width: 0;
+  }
+
+  .about__text {
+    margin-top: 2rem;
+    border-left: 4px solid var(--color-orange);
+    padding-left: 1.5rem;
+    font-size: 1.1rem;
+    line-height: 1.8;
+  }
+
+  .about__text p:first-child {
+    margin-top: 0;
+  }
+
+  .about__media {
+    width: 100%;
+    overflow: hidden;
+  }
+
+  .about__image {
+    width: 100%;
+    aspect-ratio: 16 / 10;
+    object-fit: cover;
+    display: block;
+  }
+
+  blockquote {
+    margin: 2rem 0 0;
+    font-family: var(--font-serif);
+    font-size: clamp(1.6rem, 3vw, 2.4rem);
+    line-height: 1.1;
+    letter-spacing: -0.04em;
+    color: var(--color-green-light);
+  }
+
+  @media (max-width: 820px) {
+    .about__grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

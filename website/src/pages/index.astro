@@ -1,0 +1,39 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Header from '../components/Header.astro';
+import Hero from '../components/Hero.astro';
+import BrandsSection from '../components/BrandsSection.astro';
+import AboutSection from '../components/AboutSection.astro';
+import ContactSection from '../components/ContactSection.astro';
+import Footer from '../components/Footer.astro';
+import { sanityClient, hasSanityConfig } from '../lib/sanity';
+import { brandsWithProductsQuery, aboutPageQuery } from '../lib/queries';
+import { brands as placeholderBrands, about as placeholderAbout } from '../data/placeholder';
+
+let brands = placeholderBrands;
+let about = placeholderAbout;
+
+if (hasSanityConfig) {
+  try {
+    const [cmsBrands, cmsAbout] = await Promise.all([
+      sanityClient.fetch(brandsWithProductsQuery),
+      sanityClient.fetch(aboutPageQuery),
+    ]);
+
+    if (cmsBrands?.length) brands = cmsBrands;
+    if (cmsAbout) about = { ...placeholderAbout, ...cmsAbout };
+  } catch (error) {
+    console.warn('Sanity konnte nicht geladen werden. Platzhalterdaten werden verwendet.', error);
+  }
+}
+---
+<BaseLayout title="SOTTO IL SOLE | Italienische Feinkost für Händler">
+  <Header />
+  <main>
+    <Hero />
+    <BrandsSection brands={brands} />
+    <AboutSection about={about} />
+    <ContactSection />
+  </main>
+  <Footer />
+</BaseLayout>
