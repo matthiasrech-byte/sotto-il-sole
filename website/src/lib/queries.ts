@@ -6,16 +6,7 @@ export const brandsWithProductsQuery = `
     logo,
     heroImage,
     region,
-    shortDescription,
-    description,
-    "products": *[_type == "product" && references(^._id)] | order(sortOrder asc, name asc) {
-      _id,
-      name,
-      category,
-      packSize,
-      shortDescription,
-      features
-    }
+    shortDescription
   }
 `;
 

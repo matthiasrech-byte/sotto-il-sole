@@ -1,0 +1,236 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { sanityClient } from '../../lib/sanity';
+import { urlFor } from '../../lib/sanityImage';
+
+interface SanityImage {
+  asset?: {
+    _ref?: string;
+    _type?: string;
+  };
+}
+
+interface Product {
+  name: string;
+  category?: string;
+  packSize?: string;
+  shortDescription?: string;
+}
+
+interface Brand {
+  name: string;
+  slug: {
+    current: string;
+  };
+  region?: string;
+  shortDescription?: string;
+  heroImage?: SanityImage;
+  products?: Product[];
+}
+
+export async function getStaticPaths() {
+  const brands = await sanityClient.fetch(`
+    *[_type == "brand" && defined(slug.current)] | order(sortOrder asc, name asc) {
+      name,
+      slug,
+      heroImage,
+      region,
+      shortDescription,
+      "products": *[_type == "product" && references(^._id)] | order(sortOrder asc, name asc) {
+        name,
+        category,
+        packSize,
+        shortDescription
+      }
+    }
+  `);
+
+  return brands.map((brand: Brand) => ({
+    params: {
+      slug: brand.slug.current,
+    },
+    props: {
+      brand,
+    },
+  }));
+}
+
+const { brand } = Astro.props as { brand: Brand };
+---
+
+<BaseLayout title={`${brand.name} | SOTTO IL SOLE`}>
+  <section class="section brand-detail">
+    <div class="container">
+      <a class="brand-detail__back" href="/#marken">Zur&uuml;ck zu den Marken</a>
+
+      <div class="brand-detail__hero">
+        {brand.heroImage && (
+          <div class="brand-detail__media">
+            <img
+              src={urlFor(brand.heroImage).width(1000).height(650).fit('crop').url()}
+              alt={brand.name}
+              loading="eager"
+            />
+          </div>
+        )}
+
+        <div class="brand-detail__intro">
+          {brand.region && <p class="brand-detail__region">{brand.region}</p>}
+          <h1>{brand.name}</h1>
+          {brand.shortDescription && (
+            <p class="brand-detail__description">{brand.shortDescription}</p>
+          )}
+        </div>
+      </div>
+
+      <div class="brand-detail__products">
+        {(brand.products || []).length > 0 ? (
+          <div class="product-list">
+            {(brand.products || []).map((product) => (
+              <article class="product-card">
+                {(product.category || product.packSize) && (
+                  <p class="product-card__meta">
+                    {[product.category, product.packSize].filter(Boolean).join(' · ')}
+                  </p>
+                )}
+
+                <h3>{product.name}</h3>
+
+                {product.shortDescription && (
+                  <p class="product-card__description">{product.shortDescription}</p>
+                )}
+              </article>
+            ))}
+          </div>
+        ) : (
+          <p class="brand-detail__empty">
+            Zu dieser Marke sind aktuell noch keine Produkte hinterlegt.
+          </p>
+        )}
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .brand-detail {
+    background: var(--color-sand);
+    color: var(--color-green-dark);
+  }
+
+  .brand-detail__back {
+    display: inline-flex;
+    margin-bottom: 2rem;
+    color: var(--color-green-dark);
+    font-weight: 900;
+    text-decoration: none;
+  }
+
+  .brand-detail__back:hover {
+    color: var(--color-orange);
+  }
+
+  .brand-detail__hero {
+    display: grid;
+    grid-template-columns: 1fr 0.9fr;
+    gap: clamp(2rem, 6vw, 5rem);
+    align-items: center;
+  }
+
+  .brand-detail__media {
+    width: 100%;
+    overflow: hidden;
+    background: rgba(0, 53, 20, 0.08);
+  }
+
+  .brand-detail__media img {
+    width: 100%;
+    aspect-ratio: 16 / 10;
+    object-fit: cover;
+    display: block;
+  }
+
+  .brand-detail__region {
+    display: inline-flex;
+    width: fit-content;
+    margin: 0 0 1.1rem;
+    border-radius: 999px;
+    padding: 0.4rem 0.7rem;
+    background: var(--color-orange);
+    color: white;
+    font-size: 0.72rem;
+    font-weight: 900;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .brand-detail h1 {
+    margin: 0;
+    font-family: var(--font-serif);
+    font-size: clamp(3rem, 6vw, 5.4rem);
+    line-height: 1.02;
+    letter-spacing: -0.06em;
+  }
+
+  .brand-detail__description {
+    max-width: 620px;
+    margin-top: 1.5rem;
+    font-size: 1.15rem;
+    line-height: 1.7;
+  }
+
+  .brand-detail__products {
+    margin-top: clamp(3rem, 8vw, 6rem);
+  }
+
+  .product-list {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1rem;
+    margin-top: 2rem;
+  }
+
+  .product-card {
+    border: 1px solid rgba(0, 53, 20, 0.14);
+    padding: 1.25rem;
+    background: rgba(255, 250, 243, 0.45);
+  }
+
+  .product-card h3 {
+    margin: 0;
+    font-family: var(--font-serif);
+    font-size: clamp(1.7rem, 3vw, 2.4rem);
+    line-height: 1.05;
+    letter-spacing: -0.04em;
+  }
+
+  .product-card__meta {
+  margin: 0 0 1,25rem;
+  color: var(--color-orange);
+  font-size: 0.8rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.product-card__description {
+  margin: 0.4rem 0 0;
+  color: rgba(0, 53, 20, 0.78);
+  line-height: 1.65;
+}
+
+  .brand-detail__empty {
+    margin-top: 2rem;
+    color: rgba(0, 53, 20, 0.72);
+  }
+
+  @media (max-width: 820px) {
+    .brand-detail__hero {
+      grid-template-columns: 1fr;
+    }
+
+    .product-list {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

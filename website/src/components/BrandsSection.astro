@@ -17,10 +17,12 @@ interface SanityImage {
 
 interface Brand {
   name: string;
+  slug: {
+    current: string;
+  };
   region?: string;
   shortDescription?: string;
   heroImage?: SanityImage;
-  products?: Product[];
 }
 
 interface Props {
@@ -58,26 +60,9 @@ const { brands } = Astro.props;
             {brand.shortDescription && <p>{brand.shortDescription}</p>}
           </div>
 
-          <div class="brand-card__products">
-            <p>Produkte</p>
-            <ul>
-              {(brand.products || []).map((product) => (
-          <li>
-  <strong>{product.name}</strong>
-
-  {(product.category || product.packSize) && (
-    <span class="product-meta">
-      {[product.category, product.packSize].filter(Boolean).join(' · ')}
-    </span>
-  )}
-
-  {product.shortDescription && (
-    <p class="product-description">{product.shortDescription}</p>
-  )}
-</li>
-              ))}
-            </ul>
-          </div>
+<div class="brand-card__action">
+  <a href={`/marken/${brand.slug.current}`}>Produkte ansehen</a>
+</div>
         </article>
       ))}
     </div>
@@ -111,6 +96,31 @@ const { brands } = Astro.props;
     background: rgba(222, 218, 213, 0.06);
   }
  
+  .brand-card__action {
+    margin: 2rem 1.35rem 1.35rem;
+    border-top: 1px solid rgba(222, 218, 213, 0.14);
+    padding-top: 1.15rem;
+  }
+
+    .brand-card__action a {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 999px;
+    padding: 0.6rem 0.85rem;
+    background: var(--color-orange);
+    color: white;
+    font-size: 0.78rem;
+    font-weight: 900;
+    letter-spacing: 0.04em;
+    text-decoration: none;
+    transition: transform 180ms ease;
+  }
+
+  .brand-card__action a:hover {
+    transform: translateY(-2px);
+  }
+
   .brand-card__media {
     width: 100%;
     aspect-ratio: 16 / 10;
