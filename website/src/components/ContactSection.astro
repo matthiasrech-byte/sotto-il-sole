@@ -1,10 +1,52 @@
+---
+interface Props {
+  lang?: 'de' | 'it';
+}
+
+const { lang = 'de' } = Astro.props;
+
+const isItalian = lang === 'it';
+
+const copy = isItalian
+  ? {
+      eyebrow: 'Contatto',
+      title: 'Interessato al nostro assortimento?',
+      intro:
+        'Siamo felici di ricevere richieste da grossisti, gastronomie, ristorazione e concept store.',
+      botLabel: 'Non compilare:',
+      name: 'Nome',
+      company: 'Azienda',
+      email: 'E-mail',
+      message: 'Messaggio',
+      privacyPrefix: 'Informazioni sul trattamento dei dati sono disponibili nella nostra',
+      privacyLink: 'informativa sulla privacy',
+      submit: 'Invia richiesta',
+      action: '/it/grazie',
+    }
+  : {
+      eyebrow: 'Kontakt',
+      title: 'Interesse am Sortiment?',
+      intro:
+        'Wir freuen uns über Anfragen von Großhändlern, Feinkostgeschäften, Gastronomie und Concept Stores.',
+      botLabel: 'Bitte nicht ausfüllen:',
+      name: 'Name',
+      company: 'Unternehmen',
+      email: 'E-Mail',
+      message: 'Nachricht',
+      privacyPrefix: 'Informationen zur Verarbeitung Ihrer Daten finden Sie in unserer',
+      privacyLink: 'Datenschutzerklärung',
+      submit: 'Anfrage senden',
+      action: '/danke',
+    };
+---
+
 <section class="section contact" id="kontakt">
   <div class="container contact__grid">
     <div>
-      <p class="section__eyebrow">Kontakt</p>
-      <h2 class="section__title">Interesse am Sortiment?</h2>
+      <p class="section__eyebrow">{copy.eyebrow}</p>
+      <h2 class="section__title">{copy.title}</h2>
       <p class="section__intro">
-        Wir freuen uns über Anfragen von Großhändlern, Feinkostgeschäften, Gastronomie und Concept Stores.
+        {copy.intro}
       </p>
     </div>
 
@@ -14,43 +56,43 @@
       method="POST"
       data-netlify="true"
       netlify-honeypot="bot-field"
-      action="/danke"
+      action={copy.action}
     >
       <input type="hidden" name="form-name" value="haendleranfrage" />
 
       <p class="hidden">
         <label>
-          Bitte nicht ausfüllen:
+          {copy.botLabel}
           <input name="bot-field" />
         </label>
       </p>
 
       <label>
-        Name
+        {copy.name}
         <input type="text" name="name" required />
       </label>
 
       <label>
-        Unternehmen
+        {copy.company}
         <input type="text" name="unternehmen" />
       </label>
 
       <label>
-        E-Mail
+        {copy.email}
         <input type="email" name="email" required />
       </label>
 
       <label>
-        Nachricht
+        {copy.message}
         <textarea name="nachricht" rows="5" required></textarea>
       </label>
 
       <p class="contact-form__privacy">
-        Informationen zur Verarbeitung Ihrer Daten finden Sie in unserer
-        <a href="/datenschutz">Datenschutzerklärung</a>.
+        {copy.privacyPrefix}
+        <a href="/datenschutz">{copy.privacyLink}</a>.
       </p>
 
-      <button class="button button--primary" type="submit">Anfrage senden</button>
+      <button class="button button--primary" type="submit">{copy.submit}</button>
     </form>
   </div>
 </section>

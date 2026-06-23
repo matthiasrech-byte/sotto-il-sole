@@ -7,21 +7,40 @@ interface SiteSettings {
 
 interface Props {
   siteSettings?: SiteSettings;
+  lang?: 'de' | 'it';
 }
 
-const { siteSettings } = Astro.props;
+const { siteSettings, lang = 'de' } = Astro.props;
+
+const isItalian = lang === 'it';
 
 const companyName = siteSettings?.companyName || 'SOTTO IL SOLE';
+
 const heroTitle =
-  siteSettings?.heroTitle || 'Feinkost aus Italien.\nFür Tage, die nach Süden schmecken.';
+  siteSettings?.heroTitle ||
+  (isItalian
+    ? 'Specialit&agrave; italiane.\nPer giorni che sanno di Sud.'
+    : 'Feinkost aus Italien.\nFür Tage, die nach Süden schmecken.');
+
 const heroText =
   siteSettings?.heroText ||
-  'SOTTO IL SOLE bringt ausgewählte italienische Spezialitäten nach Berlin – mit feinem Gespür für Qualität und einer guten Portion Amore.';
+  (isItalian
+    ? 'SOTTO IL SOLE porta a Berlino specialit&agrave; italiane selezionate – con attenzione alla qualit&agrave; e una buona dose di amore.'
+    : 'SOTTO IL SOLE bringt ausgewählte italienische Spezialitäten nach Berlin – mit feinem Gespür für Qualität und einer guten Portion Amore.');
+
+const copy = isItalian
+  ? {
+      brandsButton: 'Scopri i nostri marchi',
+      contactButton: 'Contattaci',
+    }
+  : {
+      brandsButton: 'Unsere Marken entdecken',
+      contactButton: 'Händlerkontakt aufnehmen',
+    };
 ---
 
 <section class="hero" id="top">
   <div class="hero__content">
-
     <p class="hero__eyebrow">{companyName}</p>
 
     <h1>{heroTitle}</h1>
@@ -29,8 +48,8 @@ const heroText =
     <p class="hero__intro">{heroText}</p>
 
     <div class="hero__actions">
-      <a href="#marken" class="button button--primary">Unsere Marken entdecken</a>
-      <a href="#kontakt" class="button button--secondary">Händlerkontakt aufnehmen</a>
+      <a href="#marken" class="button button--primary">{copy.brandsButton}</a>
+      <a href="#kontakt" class="button button--secondary">{copy.contactButton}</a>
     </div>
   </div>
 </section>
@@ -116,9 +135,9 @@ const heroText =
     }
 
     .hero h1 {
-     max-width: 760px;
-     font-size: clamp(3.2rem, 6vw, 4.8rem);
-     line-height: 1.1;
+      max-width: 760px;
+      font-size: clamp(3.2rem, 6vw, 4.8rem);
+      line-height: 1.1;
     }
 
     .hero__intro {

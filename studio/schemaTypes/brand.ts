@@ -9,8 +9,24 @@ export const brand = defineType({
     defineField({ name: 'slug', title: 'Slug', type: 'slug', options: { source: 'name' }, validation: (Rule) => Rule.required() }),
     defineField({ name: 'logo', title: 'Logo', type: 'image', options: { hotspot: true } }),
     defineField({ name: 'region', title: 'Herkunftsregion', type: 'string' }),
+    defineField({ name: 'regionIt', title: 'Herkunftsregion Italienisch', type: 'string' }),
+
     defineField({ name: 'shortDescription', title: 'Kurzbeschreibung', type: 'text', rows: 3 }),
+    defineField({
+      name: 'shortDescriptionIt',
+      title: 'Kurzbeschreibung Italienisch',
+      type: 'text',
+      rows: 3,
+    }),
+
     defineField({ name: 'description', title: 'Beschreibung', type: 'array', of: [{ type: 'block' }] }),
+    defineField({
+      name: 'descriptionIt',
+      title: 'Beschreibung Italienisch',
+      type: 'array',
+      of: [{ type: 'block' }],
+    }),
+
     defineField({ name: 'heroImage', title: 'Titelbild', type: 'image', options: { hotspot: true } }),
     defineField({ name: 'sortOrder', title: 'Sortierreihenfolge', type: 'number', initialValue: 0 }),
   ],

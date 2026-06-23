@@ -1,0 +1,24 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Header from '../../components/Header.astro';
+import Footer from '../../components/Footer.astro';
+---
+
+<BaseLayout title="Grazie | SOTTO IL SOLE">
+  <Header lang="it" />
+  <main>
+    <section class="section">
+      <div class="container">
+        <p class="section__eyebrow">Grazie</p>
+        <h1 class="section__title">Il tuo messaggio &egrave; stato inviato.</h1>
+        <p class="section__intro">
+          Ti risponderemo il prima possibile.
+        </p>
+        <p>
+          <a href="/it/" class="button button--primary">Torna alla pagina iniziale</a>
+        </p>
+      </div>
+    </section>
+  </main>
+  <Footer lang="it" />
+</BaseLayout>

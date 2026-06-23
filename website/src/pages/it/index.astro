@@ -1,0 +1,68 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Header from '../../components/Header.astro';
+import Hero from '../../components/Hero.astro';
+import BrandsSection from '../../components/BrandsSection.astro';
+import AboutSection from '../../components/AboutSection.astro';
+import ContactSection from '../../components/ContactSection.astro';
+import Footer from '../../components/Footer.astro';
+import { sanityClient, hasSanityConfig } from '../../lib/sanity';
+import { brands as placeholderBrands, about as placeholderAbout } from '../../data/placeholder';
+
+const italianBrandsQuery = `
+  *[_type == "brand"] | order(sortOrder asc, name asc) {
+    _id,
+    name,
+    slug,
+    heroImage,
+    "region": coalesce(regionIt, region),
+    "shortDescription": coalesce(shortDescriptionIt, shortDescription),
+    "description": coalesce(descriptionIt, description)
+  }
+`;
+
+const italianAboutPageQuery = `
+  *[_type == "aboutPage"][0] {
+    "headline": coalesce(headlineIt, headline),
+    "intro": coalesce(introIt, intro),
+    "founderText": coalesce(founderTextIt, founderText),
+    portrait,
+    "quote": coalesce(quoteIt, quote)
+  }
+`;
+
+let brands = placeholderBrands;
+let about = placeholderAbout;
+
+const italianHero = {
+  companyName: 'SOTTO IL SOLE',
+  heroTitle: 'Specialità italiane.\nPer giorni che sanno di Sud.',
+  heroText:
+    'SOTTO IL SOLE porta a Berlino specialità italiane selezionate – con attenzione alla qualità e una buona dose di amore.',
+};
+
+if (hasSanityConfig) {
+  try {
+    const [cmsBrands, cmsAbout] = await Promise.all([
+      sanityClient.fetch(italianBrandsQuery),
+      sanityClient.fetch(italianAboutPageQuery),
+    ]);
+
+    if (cmsBrands?.length) brands = cmsBrands;
+    if (cmsAbout) about = { ...placeholderAbout, ...cmsAbout };
+  } catch (error) {
+    console.warn('Sanity konnte nicht geladen werden. Platzhalterdaten werden verwendet.', error);
+  }
+}
+---
+
+<BaseLayout title="SOTTO IL SOLE | Specialità italiane per rivenditori">
+  <Header lang="it" />
+  <main>
+    <Hero siteSettings={italianHero} lang="it" />
+    <BrandsSection brands={brands} lang="it" />
+    <AboutSection about={about} lang="it" />
+    <ContactSection lang="it" />
+  </main>
+  <Footer lang="it" />
+</BaseLayout>

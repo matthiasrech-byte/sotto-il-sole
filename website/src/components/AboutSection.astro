@@ -15,9 +15,26 @@ interface Props {
     quote?: string;
     portrait?: SanityImage;
   };
+  lang?: 'de' | 'it';
 }
 
-const { about } = Astro.props;
+const { about, lang = 'de' } = Astro.props;
+
+const isItalian = lang === 'it';
+
+const copy = isItalian
+  ? {
+      eyebrow: 'Chi siamo',
+      fallbackHeadline: 'Con attenzione alla qualit&agrave; e all&rsquo;origine.',
+      founderText:
+        'La nostra fondatrice unisce l&rsquo;amore per l&rsquo;Italia a un chiaro impegno per la qualit&agrave;, l&rsquo;affidabilit&agrave; e una collaborazione partner con i rivenditori.',
+    }
+  : {
+      eyebrow: 'Über uns',
+      fallbackHeadline: 'Mit Gespür für Qualität und Herkunft.',
+      founderText:
+        'Unsere Gründerin verbindet Liebe zu Italien mit einem klaren Anspruch an Qualität, Verlässlichkeit und partnerschaftliche Zusammenarbeit mit Händlern.',
+    };
 ---
 
 <section class="section about" id="ueber-uns">
@@ -34,14 +51,12 @@ const { about } = Astro.props;
     )}
 
     <div class="about__content">
-      <p class="section__eyebrow">Über uns</p>
-      <h2 class="section__title">{about.headline || 'Mit Gespür für Qualität und Herkunft.'}</h2>
+      <p class="section__eyebrow">{copy.eyebrow}</p>
+      <h2 class="section__title">{about.headline || copy.fallbackHeadline}</h2>
 
       <div class="about__text">
-        <p>{about.intro}</p>
-        <p>
-          Unsere Gründerin verbindet Liebe zu Italien mit einem klaren Anspruch an Qualität, Verlässlichkeit und partnerschaftliche Zusammenarbeit mit Händlern.
-        </p>
+        {about.intro && <p>{about.intro}</p>}
+        <p>{copy.founderText}</p>
         {about.quote && <blockquote>„{about.quote}“</blockquote>}
       </div>
     </div>

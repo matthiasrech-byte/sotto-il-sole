@@ -1,13 +1,6 @@
 ---
 import { urlFor } from '../lib/sanityImage';
 
-interface Product {
-  name: string;
-  category?: string;
-  packSize?: string;
-  shortDescription?: string;
-}
-
 interface SanityImage {
   asset?: {
     _ref?: string;
@@ -27,32 +20,53 @@ interface Brand {
 
 interface Props {
   brands: Brand[];
+  lang?: 'de' | 'it';
 }
 
-const { brands } = Astro.props;
+const { brands, lang = 'de' } = Astro.props;
+
+const isItalian = lang === 'it';
+
+const copy = isItalian
+  ? {
+      eyebrow: 'I nostri marchi',
+      title: 'Il commercio nasce dalla fiducia.',
+      intro:
+        'Collaboriamo con produttori italiani selezionati, che conosciamo personalmente: piccole realt&agrave; familiari con una propria storia, radici regionali e un chiaro impegno per la qualit&agrave;.',
+      button: 'Scopri i prodotti',
+      detailBase: '/it/marchi',
+    }
+  : {
+      eyebrow: 'Unsere Marken',
+      title: 'Handel beginnt mit Vertrauen.',
+      intro:
+        'Wir arbeiten mit ausgewählten italienischen Herstellern zusammen, die wir persönlich kennen: kleine Familienbetriebe mit eigener Geschichte, regionaler Verwurzelung und einem klaren Anspruch an Qualität.',
+      button: 'Produkte ansehen',
+      detailBase: '/marken',
+    };
 ---
 
 <section class="section brands" id="marken">
   <div class="container">
-    <p class="section__eyebrow">Unsere Marken</p>
-    <h2 class="section__title">Handel beginnt mit Vertrauen.</h2>
+    <p class="section__eyebrow">{copy.eyebrow}</p>
+    <h2 class="section__title">{copy.title}</h2>
     <p class="section__intro">
-      Wir arbeiten mit ausgewählten italienischen Herstellern zusammen, die wir persönlich kennen: kleine Familienbetriebe mit eigener Geschichte, regionaler Verwurzelung und einem klaren Anspruch an Qualität.
+      {copy.intro}
     </p>
 
     <div class="brands__grid">
       {brands.map((brand) => (
         <article class="brand-card">
           <div class="brand-card__media">
-  {brand.heroImage && (
-    <img
-      class="brand-card__image"
-      src={urlFor(brand.heroImage).width(1000).height(650).fit('crop').url()}
-      alt={brand.name}
-      loading="lazy"
-    />
-  )}
-</div>
+            {brand.heroImage && (
+              <img
+                class="brand-card__image"
+                src={urlFor(brand.heroImage).width(1000).height(650).fit('crop').url()}
+                alt={brand.name}
+                loading="lazy"
+              />
+            )}
+          </div>
 
           <div class="brand-card__top">
             {brand.region && <p class="brand-card__region">{brand.region}</p>}
@@ -60,9 +74,9 @@ const { brands } = Astro.props;
             {brand.shortDescription && <p>{brand.shortDescription}</p>}
           </div>
 
-<div class="brand-card__action">
-  <a href={`/marken/${brand.slug.current}`}>Produkte ansehen</a>
-</div>
+          <div class="brand-card__action">
+            <a href={`${copy.detailBase}/${brand.slug.current}`}>{copy.button}</a>
+          </div>
         </article>
       ))}
     </div>
@@ -86,7 +100,7 @@ const { brands } = Astro.props;
     margin-top: 3rem;
   }
 
-  brand-card {
+  .brand-card {
     min-height: 420px;
     display: flex;
     flex-direction: column;
@@ -94,31 +108,6 @@ const { brands } = Astro.props;
     border: 1px solid rgba(222, 218, 213, 0.2);
     border-radius: 28px;
     background: rgba(222, 218, 213, 0.06);
-  }
- 
-  .brand-card__action {
-    margin: 2rem 1.35rem 1.35rem;
-    border-top: 1px solid rgba(222, 218, 213, 0.14);
-    padding-top: 1.15rem;
-  }
-
-    .brand-card__action a {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 999px;
-    padding: 0.6rem 0.85rem;
-    background: var(--color-orange);
-    color: white;
-    font-size: 0.78rem;
-    font-weight: 900;
-    letter-spacing: 0.04em;
-    text-decoration: none;
-    transition: transform 180ms ease;
-  }
-
-  .brand-card__action a:hover {
-    transform: translateY(-2px);
   }
 
   .brand-card__media {
@@ -175,54 +164,29 @@ const { brands } = Astro.props;
     color: rgba(222, 218, 213, 0.82);
   }
 
-     .brand-card__products {
-    margin: 2.25rem 1.35rem 1.35rem;
+  .brand-card__action {
+    margin: 1.25rem 1.35rem 1.35rem;
     border-top: 1px solid rgba(222, 218, 213, 0.14);
-    padding-top: 1.15rem;
+    padding-top: 1rem;
   }
 
-  .brand-card__products > p {
-    margin: 0 0 0.75rem;
-    color: rgba(222, 218, 213, 0.7);
+  .brand-card__action a {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 999px;
+    padding: 0.6rem 0.85rem;
+    background: #4b7c34;
+    color: white;
     font-size: 0.78rem;
     font-weight: 900;
-    letter-spacing: 0.14em;
-    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    text-decoration: none;
+    transition: transform 180ms ease;
   }
 
-    .brand-card__products ul {
-    display: grid;
-    gap: 0.45rem;
-    margin: 0;
-    padding: 0;
-    list-style: none;
-  }
-
-  .brand-card__products li {
-    border: 1px solid rgba(222, 218, 213, 0.14);
-    border-radius: 16px;
-    padding: 0.7rem 0.8rem;
-    background: rgba(222, 218, 213, 0.04);
-    font-size: 0.92rem;
-  }
-
-  .brand-card__products strong {
-    display: block;
-  }
-
-  .product-meta {
-    display: block;
-    margin-top: 0.25rem;
-    color: rgba(222, 218, 213, 0.66);
-    font-size: 0.82rem;
-    line-height: 1.4;
-  }
-
-  .product-description {
-    margin: 0.55rem 0 0;
-    color: rgba(222, 218, 213, 0.82);
-    font-size: 0.9rem;
-    line-height: 1.5;
+  .brand-card__action a:hover {
+    transform: translateY(-2px);
   }
 
   @media (max-width: 820px) {

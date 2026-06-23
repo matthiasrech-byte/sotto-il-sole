@@ -1,7 +1,9 @@
 ---
-import BaseLayout from '../../layouts/BaseLayout.astro';
-import { sanityClient } from '../../lib/sanity';
-import { urlFor } from '../../lib/sanityImage';
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import Header from '../../../components/Header.astro';
+import Footer from '../../../components/Footer.astro';
+import { sanityClient } from '../../../lib/sanity';
+import { urlFor } from '../../../lib/sanityImage';
 
 interface SanityImage {
   asset?: {
@@ -46,16 +48,16 @@ export async function getStaticPaths() {
       name,
       slug,
       heroImage,
-      region,
-      shortDescription,
+      "region": coalesce(regionIt, region),
+      "shortDescription": coalesce(shortDescriptionIt, shortDescription),
       "products": *[_type == "product" && references(^._id)] | order(sortOrder asc, name asc) {
-        name,
-        category,
+        "name": coalesce(nameIt, name),
+        "category": coalesce(categoryIt, category),
         packSize,
-        shortDescription,
+        "shortDescription": coalesce(shortDescriptionIt, shortDescription),
         image,
-        description,
-        features
+        "description": coalesce(descriptionIt, description),
+        "features": coalesce(featuresIt, features)
       }
     }
   `);
@@ -74,91 +76,97 @@ const { brand } = Astro.props as { brand: Brand };
 ---
 
 <BaseLayout title={`${brand.name} | SOTTO IL SOLE`}>
-  <section class="section brand-detail">
-    <div class="container">
-      <a class="brand-detail__back" href="/#marken">Zur&uuml;ck zu den Marken</a>
+  <Header lang="it" />
 
-      <div class="brand-detail__hero">
-        {brand.heroImage && (
-          <div class="brand-detail__media">
-            <img
-              src={urlFor(brand.heroImage).width(1000).height(650).fit('crop').url()}
-              alt={brand.name}
-              loading="eager"
-            />
-          </div>
-        )}
+  <main>
+    <section class="section brand-detail">
+      <div class="container">
+        <a class="brand-detail__back" href="/it/#marken">Torna ai marchi</a>
 
-        <div class="brand-detail__intro">
-          {brand.region && <p class="brand-detail__region">{brand.region}</p>}
-          <h1>{brand.name}</h1>
-          {brand.shortDescription && (
-            <p class="brand-detail__description">{brand.shortDescription}</p>
+        <div class="brand-detail__hero">
+          {brand.heroImage && (
+            <div class="brand-detail__media">
+              <img
+                src={urlFor(brand.heroImage).width(1000).height(650).fit('crop').url()}
+                alt={brand.name}
+                loading="eager"
+              />
+            </div>
           )}
-        </div>
-      </div>
 
-      <div class="brand-detail__products">
-        {(brand.products || []).length > 0 ? (
-          <div class="product-list">
-            {(brand.products || []).map((product) => (
-              <article class="product-card">
-                <div class="product-card__header">
-                  {product.image && (
-                    <div class="product-card__media">
-                      <img
-                        src={urlFor(product.image).width(700).height(700).fit('crop').url()}
-                        alt={product.name}
-                        loading="lazy"
-                      />
+          <div class="brand-detail__intro">
+            {brand.region && <p class="brand-detail__region">{brand.region}</p>}
+            <h1>{brand.name}</h1>
+            {brand.shortDescription && (
+              <p class="brand-detail__description">{brand.shortDescription}</p>
+            )}
+          </div>
+        </div>
+
+        <div class="brand-detail__products">
+          {(brand.products || []).length > 0 ? (
+            <div class="product-list">
+              {(brand.products || []).map((product) => (
+                <article class="product-card">
+                  <div class="product-card__header">
+                    {product.image && (
+                      <div class="product-card__media">
+                        <img
+                          src={urlFor(product.image).width(700).height(700).fit('crop').url()}
+                          alt={product.name}
+                          loading="lazy"
+                        />
+                      </div>
+                    )}
+
+                    <div class="product-card__content">
+                      {(product.category || product.packSize) && (
+                        <p class="product-card__meta">
+                          {[product.category, product.packSize].filter(Boolean).join(' · ')}
+                        </p>
+                      )}
+
+                      <h3>{product.name}</h3>
+
+                      {product.shortDescription && (
+                        <p class="product-card__description">{product.shortDescription}</p>
+                      )}
+                    </div>
+                  </div>
+
+                  {product.description && product.description.length > 0 && (
+                    <div class="product-card__details">
+                      {product.description.map((block) => (
+                        block._type === 'block' && (
+                          <p>
+                            {block.children?.map((child) => child.text).join('')}
+                          </p>
+                        )
+                      ))}
                     </div>
                   )}
 
-                  <div class="product-card__content">
-                    {(product.category || product.packSize) && (
-                      <p class="product-card__meta">
-                        {[product.category, product.packSize].filter(Boolean).join(' · ')}
-                      </p>
-                    )}
-
-                    <h3>{product.name}</h3>
-
-                    {product.shortDescription && (
-                      <p class="product-card__description">{product.shortDescription}</p>
-                    )}
-                  </div>
-                </div>
-
-                {product.description && product.description.length > 0 && (
-                  <div class="product-card__details">
-                    {product.description.map((block) => (
-                      block._type === 'block' && (
-                        <p>
-                          {block.children?.map((child) => child.text).join('')}
-                        </p>
-                      )
-                    ))}
-                  </div>
-                )}
-
-                {product.features && product.features.length > 0 && (
-                  <ul class="product-card__features">
-                    {product.features.map((feature) => (
-                      <li>{feature}</li>
-                    ))}
-                  </ul>
-                )}
-              </article>
-            ))}
-          </div>
-        ) : (
-          <p class="brand-detail__empty">
-            Zu dieser Marke sind aktuell noch keine Produkte hinterlegt.
-          </p>
-        )}
+                  {product.features && product.features.length > 0 && (
+                    <ul class="product-card__features">
+                      {product.features.map((feature) => (
+                        <li>{feature}</li>
+                      ))}
+                    </ul>
+                  )}
+                </article>
+              ))}
+            </div>
+          ) : (
+            <p class="brand-detail__empty">
+              Per questo marchio non sono ancora stati inseriti prodotti.
+            </p>
+          )}
+        </div>
       </div>
-    </div>
-  </section>
+    </section>
+  </main>
+
+  <Footer lang="it" />
 </BaseLayout>
 
 <style>
