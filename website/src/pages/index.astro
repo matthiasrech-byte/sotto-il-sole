@@ -9,6 +9,7 @@ import Footer from '../components/Footer.astro';
 import { sanityClient, hasSanityConfig } from '../lib/sanity';
 import { brandsWithProductsQuery, aboutPageQuery } from '../lib/queries';
 import { brands as placeholderBrands, about as placeholderAbout } from '../data/placeholder';
+import CatalogDownload from '../components/CatalogDownload.astro';
 
 let brands = placeholderBrands;
 let about = placeholderAbout;
@@ -27,11 +28,13 @@ if (hasSanityConfig) {
   }
 }
 ---
+
 <BaseLayout title="SOTTO IL SOLE | Italienische Feinkost für Händler">
   <Header />
   <main>
     <Hero />
     <BrandsSection brands={brands} />
+    <CatalogDownload />
     <AboutSection about={about} />
     <ContactSection />
   </main>

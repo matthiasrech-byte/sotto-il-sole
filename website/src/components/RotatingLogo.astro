@@ -1,0 +1,38 @@
+<div class="rotating-logo" aria-hidden="true">
+  <img src="/logo-footer.png" alt="" />
+</div>
+
+<style>
+  .rotating-logo {
+    display: flex;
+    justify-content: center;
+    width: 80%;
+    pointer-events: none;
+  }
+
+  .rotating-logo img {
+  display: block;
+  width: clamp(42px, 5vw, 64px);
+  height: auto;
+  opacity: 1;
+  filter: saturate(1.35) contrast(1.00) brightness(0.90);
+  animation: sotto-rotate 20s linear infinite;
+  transform-origin: center;
+}
+
+  @keyframes sotto-rotate {
+    from {
+      transform: rotate(0deg);
+    }
+
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .rotating-logo img {
+      animation: none;
+    }
+  }
+</style>

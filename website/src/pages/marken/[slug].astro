@@ -12,6 +12,7 @@ interface SanityImage {
 
 interface PortableTextChild {
   text?: string;
+  marks?: string[];
 }
 
 interface PortableTextBlock {
@@ -131,13 +132,19 @@ const { brand } = Astro.props as { brand: Brand };
 
                 {product.description && product.description.length > 0 && (
                   <div class="product-card__details">
-                    {product.description.map((block) => (
-                      block._type === 'block' && (
-                        <p>
-                          {block.children?.map((child) => child.text).join('')}
-                        </p>
-                      )
-                    ))}
+                {product.description.map((block) => (
+  block._type === 'block' && (
+    <p>
+      {block.children?.map((child) => (
+        child.marks?.includes('strong') ? (
+          <strong>{child.text}</strong>
+        ) : (
+          <span>{child.text}</span>
+        )
+      ))}
+    </p>
+  )
+))}
                   </div>
                 )}
 
@@ -295,11 +302,11 @@ const { brand } = Astro.props as { brand: Brand };
   }
 
   .product-card__details {
-    margin-top: 1rem;
-    color: #4b7c34;
-    font-size: 0.85rem;
-    line-height: 1.55;
-    text-align: left;
+  margin-top: 1rem;
+  color: rgba(0, 53, 20, 0.78);
+  font-size: 0.85rem;
+  line-height: 1.55;
+  text-align: left;
   }
 
   .product-card__details p {
@@ -309,6 +316,11 @@ const { brand } = Astro.props as { brand: Brand };
   .product-card__details p + p {
     margin-top: 0.7rem;
   }
+
+.product-card__details strong {
+  font-weight: 900;
+  color: var(--color-green-dark);
+}
 
   .product-card__features {
     display: flex;

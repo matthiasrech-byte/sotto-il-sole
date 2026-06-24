@@ -8,6 +8,7 @@ import ContactSection from '../../components/ContactSection.astro';
 import Footer from '../../components/Footer.astro';
 import { sanityClient, hasSanityConfig } from '../../lib/sanity';
 import { brands as placeholderBrands, about as placeholderAbout } from '../../data/placeholder';
+import CatalogDownload from '../../components/CatalogDownload.astro';
 
 const italianBrandsQuery = `
   *[_type == "brand"] | order(sortOrder asc, name asc) {
@@ -61,6 +62,7 @@ if (hasSanityConfig) {
   <main>
     <Hero siteSettings={italianHero} lang="it" />
     <BrandsSection brands={brands} lang="it" />
+    <CatalogDownload lang="it" />
     <AboutSection about={about} lang="it" />
     <ContactSection lang="it" />
   </main>
