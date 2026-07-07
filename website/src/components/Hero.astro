@@ -48,9 +48,8 @@ const copy = isItalian
     <p class="hero__intro">{heroText}</p>
 
     <div class="hero__actions">
-      <a href="#marken" class="button button--primary">{copy.brandsButton}</a>
-      <a href="#kontakt" class="button button--secondary">{copy.contactButton}</a>
-    </div>
+  <a href="#kontakt" class="button button--primary">{copy.contactButton}</a>
+</div>
   </div>
 </section>
 
@@ -102,30 +101,28 @@ const copy = isItalian
     margin-top: 2rem;
   }
 
-  .button {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 999px;
-    padding: 0.95rem 1.4rem;
-    font-weight: 700;
-    text-decoration: none;
-    transition: transform 180ms ease, background 180ms ease, color 180ms ease;
-  }
+ .button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  padding: 0.65rem 0.7rem;
+  font-size: 0.72rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  text-decoration: none;
+  transition: transform 180ms ease, background 180ms ease, color 180ms ease;
+}
 
   .button:hover {
     transform: translateY(-2px);
   }
 
   .button--primary {
-    background: var(--color-orange);
-    color: white;
-  }
-
-  .button--secondary {
-    border: 1px solid var(--color-green-dark);
-    color: var(--color-green-dark);
-  }
+  background: #4b7c34;
+  color: white;
+}
 
   @media (min-width: 721px) and (max-width: 1100px) {
     .hero {

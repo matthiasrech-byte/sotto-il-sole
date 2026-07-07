@@ -89,7 +89,7 @@ const copy = isItalian
 
       <p class="contact-form__privacy">
         {copy.privacyPrefix}
-        <a href="/datenschutz">{copy.privacyLink}</a>.
+        <a href={isItalian ? '/it/datenschutz' : '/datenschutz'}>{copy.privacyLink}</a>.
       </p>
 
       <button class="button button--primary" type="submit">{copy.submit}</button>
@@ -142,9 +142,19 @@ const copy = isItalian
   }
 
   button {
-    border: 0;
-    cursor: pointer;
-  }
+  border: 0;
+  cursor: pointer;
+}
+
+.contact__form .button {
+  width: 100%;
+  border-radius: 999px;
+  padding: 0.65rem 0.7rem;
+  font-size: 0.72rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
 
   .hidden {
     display: none;
