@@ -7,22 +7,25 @@ import AboutSection from '../components/AboutSection.astro';
 import ContactSection from '../components/ContactSection.astro';
 import Footer from '../components/Footer.astro';
 import { sanityClient, hasSanityConfig } from '../lib/sanity';
-import { brandsWithProductsQuery, aboutPageQuery } from '../lib/queries';
+import { brandsWithProductsQuery, aboutPageQuery, siteSettingsQuery } from '../lib/queries';
 import { brands as placeholderBrands, about as placeholderAbout } from '../data/placeholder';
 import CatalogDownload from '../components/CatalogDownload.astro';
 
 let brands = placeholderBrands;
 let about = placeholderAbout;
+let siteSettings = null;
 
 if (hasSanityConfig) {
   try {
-    const [cmsBrands, cmsAbout] = await Promise.all([
-      sanityClient.fetch(brandsWithProductsQuery),
-      sanityClient.fetch(aboutPageQuery),
-    ]);
+    const [cmsBrands, cmsAbout, cmsSiteSettings] = await Promise.all([
+  sanityClient.fetch(brandsWithProductsQuery),
+  sanityClient.fetch(aboutPageQuery),
+  sanityClient.fetch(siteSettingsQuery),
+]);
 
     if (cmsBrands?.length) brands = cmsBrands;
-    if (cmsAbout) about = { ...placeholderAbout, ...cmsAbout };
+    if (cmsAbout) about = { ...placeholderAbout, ...cmsAbout };	
+    if (cmsSiteSettings) siteSettings = cmsSiteSettings;
   } catch (error) {
     console.warn('Sanity konnte nicht geladen werden. Platzhalterdaten werden verwendet.', error);
   }
@@ -32,7 +35,7 @@ if (hasSanityConfig) {
 <BaseLayout title="SOTTO IL SOLE | Italienische Feinkost für Händler">
   <Header />
   <main>
-    <Hero />
+    <Hero siteSettings={siteSettings} />
     <BrandsSection brands={brands} />
     <CatalogDownload />
     <AboutSection about={about} />

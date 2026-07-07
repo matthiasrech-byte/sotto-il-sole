@@ -22,10 +22,14 @@ export const aboutPageQuery = `
 export const siteSettingsQuery = `
   *[_type == "siteSettings"][0] {
     companyName,
+    logo,
     heroTitle,
+    heroTitleIt,
     heroText,
+    heroTextIt,
     contactEmail,
     phone,
-    address
+    address,
+    addressIt
   }
 `;

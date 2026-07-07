@@ -2,7 +2,9 @@
 interface SiteSettings {
   companyName?: string;
   heroTitle?: string;
+  heroTitleIt?: string;
   heroText?: string;
+  heroTextIt?: string;
 }
 
 interface Props {
@@ -17,16 +19,14 @@ const isItalian = lang === 'it';
 const companyName = siteSettings?.companyName || 'SOTTO IL SOLE';
 
 const heroTitle =
-  siteSettings?.heroTitle ||
-  (isItalian
-    ? 'Specialit&agrave; italiane.\nPer giorni che sanno di Sud.'
-    : 'Feinkost aus Italien.\nFür Tage, die nach Süden schmecken.');
+  isItalian
+    ? siteSettings?.heroTitleIt || siteSettings?.heroTitle || ''
+    : siteSettings?.heroTitle || '';
 
 const heroText =
-  siteSettings?.heroText ||
-  (isItalian
-    ? 'SOTTO IL SOLE porta a Berlino specialit&agrave; italiane selezionate – con attenzione alla qualit&agrave; e una buona dose di amore.'
-    : 'SOTTO IL SOLE bringt ausgewählte italienische Spezialitäten nach Berlin – mit feinem Gespür für Qualität und einer guten Portion Amore.');
+  isItalian
+    ? siteSettings?.heroTextIt || siteSettings?.heroText || ''
+    : siteSettings?.heroText || '';
 
 const copy = isItalian
   ? {
