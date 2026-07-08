@@ -23,6 +23,8 @@ const heroTitle =
     ? siteSettings?.heroTitleIt || siteSettings?.heroTitle || ''
     : siteSettings?.heroTitle || '';
 
+const formattedHeroTitle = heroTitle.replace('. ', '.\n');
+
 const heroText =
   isItalian
     ? siteSettings?.heroTextIt || siteSettings?.heroText || ''
@@ -30,38 +32,39 @@ const heroText =
 
 const copy = isItalian
   ? {
-      brandsButton: 'Scopri i nostri marchi',
       contactButton: 'Contattaci',
     }
   : {
-      brandsButton: 'Unsere Marken entdecken',
       contactButton: 'Händlerkontakt aufnehmen',
     };
 ---
 
-<section class="hero" id="top">
+<section class:list={['hero', isItalian && 'hero--it']} id="top">
   <div class="hero__content">
     <p class="hero__eyebrow">{companyName}</p>
 
-    <h1>{heroTitle}</h1>
+    <h1>{formattedHeroTitle}</h1>
 
     <p class="hero__intro">{heroText}</p>
 
     <div class="hero__actions">
-  <a href="#kontakt" class="button button--primary">{copy.contactButton}</a>
-</div>
+      <a href="#kontakt" class="button button--primary">{copy.contactButton}</a>
+    </div>
   </div>
 </section>
 
 <style>
   .hero {
-    min-height: 88vh;
-    display: flex;
-    align-items: center;
-    padding: 8rem 1.5rem 5rem;
-    background: var(--color-sand);
-    color: var(--color-green-dark);
-  }
+  min-height: 88vh;
+  display: flex;
+  align-items: center;
+  padding: 8rem 1.5rem 5rem;
+  background-image: url('/hero-bg.png');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  color: var(--color-green-dark);
+}
 
   .hero__content {
     width: min(100%, 1120px);
@@ -70,7 +73,7 @@ const copy = isItalian
 
   .hero__eyebrow {
     margin-bottom: 1.25rem;
-    font-size: 0.85rem;
+    font-size: 0.9rem;
     letter-spacing: 0.18em;
     text-transform: uppercase;
     color: var(--color-green-light);
@@ -82,16 +85,20 @@ const copy = isItalian
     margin: 0;
     white-space: pre-line;
     font-family: var(--font-serif);
-    font-size: clamp(3rem, 6.5vw, 6.2rem);
+    font-size: clamp(2.7rem, 5.7vw, 5.5rem);
     line-height: 1.08;
     letter-spacing: -0.06em;
   }
 
+.hero--it h1 {
+  max-width: 700px;
+}
+
   .hero__intro {
     max-width: 720px;
     margin-top: 2rem;
-    font-size: clamp(1.1rem, 2vw, 1.4rem);
-    line-height: 1.6;
+    font-size: clamp(1.05rem, 2vw, 1.25rem);
+    line-height: 1.65;
   }
 
   .hero__actions {
@@ -101,13 +108,13 @@ const copy = isItalian
     margin-top: 2rem;
   }
 
- .button {
+  .button {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   border-radius: 999px;
-  padding: 0.65rem 0.7rem;
-  font-size: 0.72rem;
+  padding: 0.85rem 1.15rem;
+  font-size: 0.9rem;
   font-weight: 900;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -120,28 +127,32 @@ const copy = isItalian
   }
 
   .button--primary {
-  background: #4b7c34;
-  color: white;
-}
+    background: #4b7c34;
+    color: white;
+  }
 
   @media (min-width: 721px) and (max-width: 1100px) {
-    .hero {
-      min-height: auto;
-      padding-top: 7rem;
-      padding-bottom: 4rem;
-    }
-
-    .hero h1 {
-      max-width: 760px;
-      font-size: clamp(3.2rem, 6vw, 4.8rem);
-      line-height: 1.1;
-    }
-
-    .hero__intro {
-      max-width: 620px;
-      margin-top: 1.6rem;
-    }
+  .hero {
+    min-height: auto;
+    padding-top: 7rem;
+    padding-bottom: 4rem;
   }
+
+  .hero h1 {
+    max-width: 760px;
+    font-size: clamp(3.2rem, 6vw, 4.8rem);
+    line-height: 1.1;
+  }
+
+  .hero--it h1 {
+    max-width: 640px;
+  }
+
+  .hero__intro {
+    max-width: 620px;
+    margin-top: 1.6rem;
+  }
+}
 
   @media (max-width: 720px) {
     .hero {

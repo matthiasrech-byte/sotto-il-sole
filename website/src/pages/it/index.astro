@@ -7,6 +7,7 @@ import AboutSection from '../../components/AboutSection.astro';
 import ContactSection from '../../components/ContactSection.astro';
 import Footer from '../../components/Footer.astro';
 import { sanityClient, hasSanityConfig } from '../../lib/sanity';
+import { siteSettingsQuery } from '../../lib/queries';
 import { brands as placeholderBrands, about as placeholderAbout } from '../../data/placeholder';
 import CatalogDownload from '../../components/CatalogDownload.astro';
 
@@ -34,27 +35,27 @@ const italianAboutPageQuery = `
 
 let brands = placeholderBrands;
 let about = placeholderAbout;
+let siteSettings = null;
 
-const italianHero = {
-  companyName: 'SOTTO IL SOLE',
-  heroTitle: 'Specialità italiane.\nPer giorni che sanno di Sud.',
-  heroText:
-    'SOTTO IL SOLE porta a Berlino specialità italiane selezionate – con attenzione alla qualità e una buona dose di amore.',
-};
+let italianHero = null;
 
 if (hasSanityConfig) {
   try {
-    const [cmsBrands, cmsAbout] = await Promise.all([
-      sanityClient.fetch(italianBrandsQuery),
-      sanityClient.fetch(italianAboutPageQuery),
-    ]);
+    const [cmsBrands, cmsAbout, cmsSiteSettings] = await Promise.all([
+  sanityClient.fetch(italianBrandsQuery),
+  sanityClient.fetch(italianAboutPageQuery),
+  sanityClient.fetch(siteSettingsQuery),
+]);
 
     if (cmsBrands?.length) brands = cmsBrands;
     if (cmsAbout) about = { ...placeholderAbout, ...cmsAbout };
+    if (cmsSiteSettings) siteSettings = cmsSiteSettings;
   } catch (error) {
     console.warn('Sanity konnte nicht geladen werden. Platzhalterdaten werden verwendet.', error);
   }
 }
+
+italianHero = siteSettings;
 ---
 
 <BaseLayout title="SOTTO IL SOLE | Specialità italiane per rivenditori">
