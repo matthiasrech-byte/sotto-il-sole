@@ -17,6 +17,10 @@ html {
   background: var(--color-sand);
 }
 
+section[id] {
+  scroll-margin-top: 3rem;
+}
+
 body {
   margin: 0;
   font-family: var(--font-sans);
