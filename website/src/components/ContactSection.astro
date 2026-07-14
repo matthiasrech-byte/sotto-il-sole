@@ -56,7 +56,7 @@ const copy = isItalian
   method="POST"
   data-netlify="true"
   data-netlify-honeypot="bot-field"
-  action={copy.action}
+  action="/danke/"
 >
   <input type="hidden" name="form-name" value="haendleranfrage" />
 
@@ -66,13 +66,6 @@ const copy = isItalian
       <input name="bot-field" />
     </label>
   </p>
-
-      <p class="hidden">
-        <label>
-          {copy.botLabel}
-          <input name="bot-field" />
-        </label>
-      </p>
 
       <label>
         {copy.name}
