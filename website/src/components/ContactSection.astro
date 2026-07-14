@@ -51,14 +51,21 @@ const copy = isItalian
     </div>
 
     <form
-      class="contact__form"
-      name="haendleranfrage"
-      method="POST"
-      data-netlify="true"
-      netlify-honeypot="bot-field"
-      action={copy.action}
-    >
-      <input type="hidden" name="form-name" value="haendleranfrage" />
+  class="contact__form"
+  name="haendleranfrage"
+  method="POST"
+  data-netlify="true"
+  data-netlify-honeypot="bot-field"
+  action={copy.action}
+>
+  <input type="hidden" name="form-name" value="haendleranfrage" />
+
+  <p class="hidden">
+    <label>
+      Bitte nicht ausfüllen:
+      <input name="bot-field" />
+    </label>
+  </p>
 
       <p class="hidden">
         <label>
