@@ -35,6 +35,21 @@ if (hasSanityConfig) {
 <BaseLayout title="SOTTO IL SOLE | Italienische Feinkost für Händler">
   <Header />
   <main>
+    <form
+      name="haendleranfrage"
+      method="POST"
+      data-netlify="true"
+      data-netlify-honeypot="bot-field"
+      hidden
+    >
+      <input type="hidden" name="form-name" value="haendleranfrage" />
+      <input type="text" name="name" />
+      <input type="text" name="unternehmen" />
+      <input type="email" name="email" />
+      <textarea name="nachricht"></textarea>
+      <input type="text" name="bot-field" />
+    </form>
+
     <Hero siteSettings={siteSettings} />
     <BrandsSection brands={brands} />
     <CatalogDownload />
