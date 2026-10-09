@@ -1,5 +1,6 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
+import ShopifyBuyBox from '../../components/ShopifyBuyBox.astro';
 import { sanityClient } from '../../lib/sanity';
 import { urlFor } from '../../lib/sanityImage';
 
@@ -28,6 +29,13 @@ interface Product {
   image?: SanityImage;
   description?: PortableTextBlock[];
   features?: string[];
+  shopEnabled?: boolean;
+  shopifyProductId?: string;
+  shopifyVariantId?: string;
+  price?: string;
+  unit?: string;
+  basePrice?: string;
+  shopButtonText?: string;
 }
 
 interface Brand {
@@ -56,7 +64,14 @@ export async function getStaticPaths() {
         shortDescription,
         image,
         description,
-        features
+        features,
+        shopEnabled,
+        shopifyProductId,
+        shopifyVariantId,
+        price,
+        unit,
+        basePrice,
+        shopButtonText
       }
     }
   `);
@@ -132,19 +147,19 @@ const { brand } = Astro.props as { brand: Brand };
 
                 {product.description && product.description.length > 0 && (
                   <div class="product-card__details">
-                {product.description.map((block) => (
-  block._type === 'block' && (
-    <p>
-      {block.children?.map((child) => (
-        child.marks?.includes('strong') ? (
-          <strong>{child.text}</strong>
-        ) : (
-          <span>{child.text}</span>
-        )
-      ))}
-    </p>
-  )
-))}
+                    {product.description.map((block) => (
+                      block._type === 'block' && (
+                        <p>
+                          {block.children?.map((child) => (
+                            child.marks?.includes('strong') ? (
+                              <strong>{child.text}</strong>
+                            ) : (
+                              <span>{child.text}</span>
+                            )
+                          ))}
+                        </p>
+                      )
+                    ))}
                   </div>
                 )}
 
@@ -154,6 +169,16 @@ const { brand } = Astro.props as { brand: Brand };
                       <li>{feature}</li>
                     ))}
                   </ul>
+                )}
+
+                {product.shopEnabled && product.shopifyProductId && (
+                  <ShopifyBuyBox
+                    shopifyProductId={product.shopifyProductId}
+                    price={product.price}
+                    unit={product.unit}
+                    basePrice={product.basePrice}
+                    buttonText={product.shopButtonText}
+                  />
                 )}
               </article>
             ))}
@@ -302,11 +327,11 @@ const { brand } = Astro.props as { brand: Brand };
   }
 
   .product-card__details {
-  margin-top: 1rem;
-  color: rgba(0, 53, 20, 0.78);
-  font-size: 0.85rem;
-  line-height: 1.55;
-  text-align: left;
+    margin-top: 1rem;
+    color: rgba(0, 53, 20, 0.78);
+    font-size: 0.85rem;
+    line-height: 1.55;
+    text-align: left;
   }
 
   .product-card__details p {
@@ -317,10 +342,10 @@ const { brand } = Astro.props as { brand: Brand };
     margin-top: 0.7rem;
   }
 
-.product-card__details strong {
-  font-weight: 900;
-  color: var(--color-green-dark);
-}
+  .product-card__details strong {
+    font-weight: 900;
+    color: var(--color-green-dark);
+  }
 
   .product-card__features {
     display: flex;
