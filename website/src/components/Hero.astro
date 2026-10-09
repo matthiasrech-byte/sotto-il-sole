@@ -1,18 +1,23 @@
 ---
-interface SiteSettings {
-  companyName?: string;
-  heroTitle?: string;
-  heroTitleIt?: string;
-  heroText?: string;
-  heroTextIt?: string;
-}
-
 interface Props {
-  siteSettings?: SiteSettings;
+  siteSettings?: {
+    companyName?: string;
+    heroTitle?: string;
+    heroTitleIt?: string;
+    heroText?: string;
+    heroTextIt?: string;
+  };
   lang?: 'de' | 'it';
+  showButton?: boolean;
+  showBackgroundImage?: boolean;
 }
 
-const { siteSettings, lang = 'de' } = Astro.props;
+const {
+  siteSettings,
+  lang = 'de',
+  showButton = true,
+  showBackgroundImage = true,
+} = Astro.props;
 
 const isItalian = lang === 'it';
 
@@ -39,7 +44,14 @@ const copy = isItalian
     };
 ---
 
-<section class:list={['hero', isItalian && 'hero--it']} id="top">
+<section
+  class:list={[
+    'hero',
+    isItalian && 'hero--it',
+    !showBackgroundImage && 'hero--plain',
+  ]}
+  id="top"
+>
   <div class="hero__content">
     <p class="hero__eyebrow">{companyName}</p>
 
@@ -47,9 +59,11 @@ const copy = isItalian
 
     <p class="hero__intro">{heroText}</p>
 
-    <div class="hero__actions">
-      <a href="#kontakt" class="button button--primary">{copy.contactButton}</a>
-    </div>
+   {showButton && (
+  <div class="hero__actions">
+    <a href="#kontakt" class="button button--primary">{copy.contactButton}</a>
+  </div>
+)}
   </div>
 </section>
 
@@ -65,6 +79,10 @@ const copy = isItalian
     center / cover
     no-repeat;
   color: var(--color-green-dark);
+}
+
+.hero--plain {
+  background: var(--color-sand);
 }
 
   .hero__content {

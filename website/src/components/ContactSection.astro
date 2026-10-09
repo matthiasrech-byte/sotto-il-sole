@@ -1,11 +1,14 @@
 ---
 interface Props {
   lang?: 'de' | 'it';
+  variant?: 'consumer' | 'trade';
 }
 
-const { lang = 'de' } = Astro.props;
+const { lang = 'de', variant = 'consumer' } = Astro.props;
 
 const isItalian = lang === 'it';
+
+const isTrade = variant === 'trade';
 
 const copy = isItalian
   ? {
@@ -23,21 +26,37 @@ const copy = isItalian
       submit: 'Invia richiesta',
       action: '/it/grazie',
     }
-  : {
-      eyebrow: 'Kontakt',
-      title: 'Interesse am Sortiment?',
-      intro:
-        'Wir freuen uns über Anfragen von Großhändlern, Feinkostgeschäften, Gastronomie und Concept Stores.',
-      botLabel: 'Bitte nicht ausfüllen:',
-      name: 'Name',
-      company: 'Unternehmen',
-      email: 'E-Mail',
-      message: 'Nachricht',
-      privacyPrefix: 'Informationen zur Verarbeitung Ihrer Daten finden Sie in unserer',
-      privacyLink: 'Datenschutzerklärung',
-      submit: 'Anfrage senden',
-      action: '/danke',
-    };
+    : isTrade
+    ? {
+        eyebrow: 'Kontakt',
+        title: 'Interesse am Sortiment?',
+        intro:
+          'Wir freuen uns über Anfragen von Großhändlern, Feinkostgeschäften, Gastronomie und Concept Stores.',
+        botLabel: 'Bitte nicht ausfüllen:',
+        name: 'Name',
+        company: 'Unternehmen',
+        email: 'E-Mail',
+        message: 'Nachricht',
+        privacyPrefix: 'Informationen zur Verarbeitung Ihrer Daten finden Sie in unserer',
+        privacyLink: 'Datenschutzerklärung',
+        submit: 'Anfrage senden',
+        action: '/danke',
+      }
+    : {
+        eyebrow: 'Kontakt',
+        title: 'Parliamo!',
+        intro:
+          'Du hast Fragen zu unseren Produkten oder möchtest mehr über unsere Produzenten erfahren? Oder du kennst eine kleine italienische Manufaktur, die wir unbedingt entdecken sollten? Dann schreib uns – wir freuen uns auf deine Nachricht!',
+        botLabel: 'Bitte nicht ausfüllen:',
+        name: 'Name',
+        company: 'Unternehmen',
+        email: 'E-Mail',
+        message: 'Nachricht',
+        privacyPrefix: 'Informationen zur Verarbeitung deiner Daten findest du in unserer',
+        privacyLink: 'Datenschutzerklärung',
+        submit: 'Nachricht senden',
+        action: '/danke',
+      };
 ---
 
 <section class="section contact" id="kontakt">
@@ -91,10 +110,12 @@ const copy = isItalian
         <input type="text" name="name" required />
       </label>
 
-      <label>
-        {copy.company}
-        <input type="text" name="unternehmen" />
-      </label>
+      {isTrade && (
+  <label>
+    {copy.company}
+    <input type="text" name="unternehmen" />
+  </label>
+)}
 
       <label>
         {copy.email}

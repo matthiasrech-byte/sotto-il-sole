@@ -9,7 +9,6 @@ import Footer from '../components/Footer.astro';
 import { sanityClient, hasSanityConfig } from '../lib/sanity';
 import { brandsWithProductsQuery, aboutPageQuery, siteSettingsQuery } from '../lib/queries';
 import { brands as placeholderBrands, about as placeholderAbout } from '../data/placeholder';
-import CatalogDownload from '../components/CatalogDownload.astro';
 
 let brands = placeholderBrands;
 let about = placeholderAbout;
@@ -50,9 +49,8 @@ if (hasSanityConfig) {
       <input type="text" name="bot-field" />
     </form>
 
-    <Hero siteSettings={siteSettings} />
+    <Hero siteSettings={siteSettings} showButton={false} />
     <BrandsSection brands={brands} />
-    <CatalogDownload />
     <AboutSection about={about} />
     <ContactSection />
   </main>
