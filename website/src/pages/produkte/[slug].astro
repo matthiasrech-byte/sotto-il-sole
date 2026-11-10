@@ -1,0 +1,354 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import ShopifyBuyBox from '../../components/ShopifyBuyBox.astro';
+import { sanityClient } from '../../lib/sanity';
+import { urlFor } from '../../lib/sanityImage';
+
+interface SanityImage {
+  asset?: {
+    _ref?: string;
+    _type?: string;
+  };
+}
+
+interface PortableTextChild {
+  text?: string;
+  marks?: string[];
+}
+
+interface PortableTextBlock {
+  _type?: string;
+  children?: PortableTextChild[];
+}
+
+interface Product {
+  name: string;
+  slug: { current: string };
+  brandInfo?: {
+    name: string;
+    slug: { current: string };
+  };
+  category?: string;
+  packSize?: string;
+  shortDescription?: string;
+  image?: SanityImage;
+  description?: PortableTextBlock[];
+  features?: string[];
+  shopEnabled?: boolean;
+  shopifyProductId?: string;
+  price?: string;
+  unit?: string;
+  basePrice?: string;
+  shopButtonText?: string;
+}
+
+export async function getStaticPaths() {
+  const products: Product[] = await sanityClient.fetch(`
+    *[_type == "product" && defined(slug.current) && shopEnabled == true && defined(shopifyProductId)] | order(name asc) {
+      name,
+      slug,
+      category,
+      packSize,
+      shortDescription,
+      image,
+      description,
+      features,
+      shopEnabled,
+      shopifyProductId,
+      price,
+      unit,
+      basePrice,
+      shopButtonText,
+      "brandInfo": brand->{ name, slug }
+    }
+  `);
+
+  return products
+    .filter((product) => product.brandInfo?.slug?.current && product.slug?.current)
+    .map((product) => ({
+      params: {
+        slug: `${product.brandInfo!.slug.current}-${product.slug.current}`,
+      },
+      props: { product },
+    }));
+}
+
+const { product } = Astro.props as { product: Product };
+const brand = product.brandInfo!;
+const metaDescription = product.shortDescription || `${product.name} von ${brand.name} bei SOTTO IL SOLE entdecken und bestellen.`;
+---
+
+<BaseLayout title={`${product.name} | ${brand.name} | SOTTO IL SOLE`} description={metaDescription}>
+  <section class="section product-detail">
+    <div class="container">
+      <nav class="product-detail__nav" aria-label="Brotkrumennavigation">
+        <a href="/#marken">Shop</a>
+        <span aria-hidden="true">/</span>
+        <a href={`/marken/${brand.slug.current}`}>{brand.name}</a>
+        <span aria-hidden="true">/</span>
+        <span aria-current="page">{product.name}</span>
+      </nav>
+
+      <div class="product-detail__grid">
+        {product.image && (
+          <div class="product-detail__media">
+            <button
+              type="button"
+              class="product-detail__zoom"
+              data-zoom-src={urlFor(product.image).width(1800).url()}
+              data-zoom-alt={product.name}
+              aria-label={`${product.name} vergrößern`}
+            >
+              <img
+                src={urlFor(product.image).width(1100).url()}
+                alt={product.name}
+                loading="eager"
+              />
+              <span class="product-detail__zoom-icon" aria-hidden="true">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="11" cy="11" r="8" />
+                  <path d="m21 21-4.35-4.35" />
+                  <path d="M11 8v6M8 11h6" />
+                </svg>
+              </span>
+            </button>
+          </div>
+        )}
+
+        <div class="product-detail__content">
+          <p class="product-detail__brand">{brand.name}</p>
+          {(product.category || product.packSize) && (
+            <p class="product-detail__meta">
+              {[product.category, product.packSize].filter(Boolean).join(' · ')}
+            </p>
+          )}
+          <h1>{product.name}</h1>
+          {product.shortDescription && (
+            <p class="product-detail__lead">{product.shortDescription}</p>
+          )}
+
+          {product.shopEnabled && product.shopifyProductId && (
+            <ShopifyBuyBox
+              shopifyProductId={product.shopifyProductId}
+              price={product.price}
+              unit={product.unit}
+              basePrice={product.basePrice}
+              buttonText={product.shopButtonText}
+            />
+          )}
+
+          {product.description && product.description.length > 0 && (
+            <div class="product-detail__description">
+              {product.description.map((block) => (
+                block._type === 'block' && (
+                  <p>
+                    {block.children?.map((child) => (
+                      child.marks?.includes('strong') ? (
+                        <strong>{child.text}</strong>
+                      ) : (
+                        <span>{child.text}</span>
+                      )
+                    ))}
+                  </p>
+                )
+              ))}
+            </div>
+          )}
+
+          {product.features && product.features.length > 0 && (
+            <ul class="product-detail__features">
+              {product.features.map((feature) => <li>{feature}</li>)}
+            </ul>
+          )}
+          <a class="product-detail__back" href={`/marken/${brand.slug.current}`}>
+            Mehr von {brand.name} entdecken
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <dialog class="product-lightbox" id="product-lightbox" aria-label="Vergrößertes Produktbild">
+    <button type="button" class="product-lightbox__close" aria-label="Bild schließen">×</button>
+    <img alt="" class="product-lightbox__image" />
+  </dialog>
+
+  <script>
+    const dialog = document.querySelector<HTMLDialogElement>('#product-lightbox');
+    const image = dialog?.querySelector<HTMLImageElement>('.product-lightbox__image');
+    const closeButton = dialog?.querySelector<HTMLButtonElement>('.product-lightbox__close');
+
+    document.querySelectorAll<HTMLButtonElement>('.product-detail__zoom').forEach((button) => {
+      button.addEventListener('click', () => {
+        if (!dialog || !image) return;
+        image.src = button.dataset.zoomSrc || '';
+        image.alt = button.dataset.zoomAlt || '';
+        dialog.showModal();
+      });
+    });
+    closeButton?.addEventListener('click', () => dialog?.close());
+    dialog?.addEventListener('click', (event) => {
+      if (event.target === dialog) dialog.close();
+    });
+    dialog?.addEventListener('close', () => image?.removeAttribute('src'));
+  </script>
+</BaseLayout>
+
+<style>
+  .product-detail {
+    background: var(--color-sand);
+    color: var(--color-green-dark);
+  }
+  .product-detail__nav {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.65rem;
+    align-items: center;
+    margin-bottom: 2.5rem;
+    font-size: 0.85rem;
+    line-height: 1.6;
+  }
+  .product-detail__nav a,
+  .product-detail__back {
+    color: var(--color-green-dark);
+    font-weight: 900;
+    text-decoration: none;
+  }
+  .product-detail__nav a:hover,
+  .product-detail__back:hover {
+    color: var(--color-orange);
+  }
+  .product-detail__grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    align-items: start;
+    gap: clamp(2rem, 5vw, 5rem);
+  }
+  .product-detail__media {
+    width: 100%;
+    background: rgba(0, 53, 20, 0.06);
+  }
+  .product-detail__zoom {
+    position: relative;
+    display: block;
+    width: 100%;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    cursor: zoom-in;
+  }
+  .product-detail__zoom img {
+    display: block;
+    width: 100%;
+    height: auto;
+    max-height: 720px;
+    object-fit: contain;
+  }
+  .product-detail__zoom-icon {
+    position: absolute;
+    right: 12px;
+    bottom: 12px;
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: var(--color-sand);
+    color: var(--color-green-dark);
+    box-shadow: 0 2px 12px rgba(0, 53, 20, 0.15);
+    pointer-events: none;
+  }
+  .product-detail__zoom:hover .product-detail__zoom-icon { transform: scale(1.08); }
+  .product-detail__zoom:focus-visible { outline: 3px solid var(--color-orange); outline-offset: 3px; }
+  .product-detail__brand {
+    margin: 0 0 0.5rem;
+    color: var(--color-orange);
+    font-size: 0.9rem;
+    font-weight: 900;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+  .product-detail__meta {
+    margin: 0 0 0.9rem;
+    color: rgba(0, 53, 20, 0.72);
+    font-size: 0.82rem;
+    font-weight: 800;
+    text-transform: uppercase;
+  }
+  .product-detail h1 {
+    margin: 0;
+    font-family: var(--font-serif);
+    font-size: clamp(2.6rem, 5vw, 5rem);
+    line-height: 1.05;
+    letter-spacing: -0.05em;
+  }
+  .product-detail__lead {
+    margin: 1.25rem 0;
+    font-size: 1.1rem;
+    line-height: 1.7;
+  }
+  .product-detail__description {
+    margin-top: 2rem;
+    color: rgba(0, 53, 20, 0.82);
+    line-height: 1.65;
+  }
+  .product-detail__description p { margin: 0 0 1rem; }
+  .product-detail__description strong { font-weight: 900; color: var(--color-green-dark); }
+  .product-detail__features {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.45rem;
+    margin: 1.5rem 0 0;
+    padding: 0;
+    list-style: none;
+  }
+  .product-detail__features li {
+    border: 1px solid rgba(0, 53, 20, 0.14);
+    padding: 0.45rem 0.65rem;
+    font-size: 0.82rem;
+    font-weight: 800;
+  }
+  .product-detail__back { display: inline-block; margin-top: 2rem; }
+
+  .product-lightbox {
+    position: fixed;
+    inset: 0;
+    width: min(94vw, 1100px);
+    max-width: none;
+    max-height: 94vh;
+    margin: auto;
+    padding: 1rem;
+    box-sizing: border-box;
+    border: none;
+    background: var(--color-sand);
+  }
+  .product-lightbox::backdrop { background: rgba(0, 30, 12, 0.88); }
+  .product-lightbox__image {
+    display: block;
+    width: 100%;
+    max-height: calc(94vh - 2rem);
+    object-fit: contain;
+  }
+  .product-lightbox__close {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    z-index: 3;
+    width: 44px;
+    height: 44px;
+    border: none;
+    border-radius: 50%;
+    background: var(--color-green-dark);
+    color: white;
+    font-size: 2rem;
+    line-height: 1;
+    cursor: pointer;
+  }
+  @media (max-width: 820px) {
+    .product-detail__grid { grid-template-columns: 1fr; }
+    .product-detail__nav { margin-bottom: 1.5rem; }
+    .product-detail__zoom-icon { opacity: 1; visibility: visible; }
+  }
+</style>

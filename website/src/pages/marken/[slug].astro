@@ -23,6 +23,7 @@ interface PortableTextBlock {
 
 interface Product {
   name: string;
+  slug?: { current: string };
   category?: string;
   packSize?: string;
   shortDescription?: string;
@@ -59,6 +60,7 @@ export async function getStaticPaths() {
       shortDescription,
       "products": *[_type == "product" && references(^._id)] | order(sortOrder asc, name asc) {
         name,
+        slug,
         category,
         packSize,
         shortDescription,
@@ -155,6 +157,11 @@ const { brand } = Astro.props as { brand: Brand };
 
                     {product.shortDescription && (
                       <p class="product-card__description">{product.shortDescription}</p>
+                    )}
+                    {product.shopEnabled && product.shopifyProductId && product.slug?.current && (
+                      <a class="product-card__detail-link" href={`/produkte/${brand.slug.current}-${product.slug.current}`}>
+                        Produkt ansehen
+                      </a>
                     )}
                   </div>
                 </div>
@@ -381,6 +388,18 @@ const { brand } = Astro.props as { brand: Brand };
     line-height: 1.55;
   }
 
+  .product-card__detail-link {
+    display: inline-block;
+    margin-top: 0.9rem;
+    color: var(--color-green-dark);
+    font-size: 0.87rem;
+    font-weight: 900;
+    text-underline-offset: 3px;
+  }
+  .product-card__detail-link:hover {
+    color: var(--color-orange);
+  }
+
   .product-card__details {
     margin-top: 1rem;
     color: rgba(0, 53, 20, 0.78);
@@ -514,5 +533,29 @@ const { brand } = Astro.props as { brand: Brand };
   font-size: 2rem;
   line-height: 1;
   cursor: pointer;
+}
+
+/* Lupe auf Touch-Geräten immer sichtbar und gut antippbar */
+@media (hover: none), (max-width: 820px) {
+  .product-card__zoom {
+    position: relative;
+    display: block;
+    width: 100%;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .product-card__zoom-icon {
+    position: absolute;
+    right: 10px;
+    bottom: 10px;
+    z-index: 3;
+    display: flex;
+    width: 44px;
+    height: 44px;
+    opacity: 1;
+    visibility: visible;
+    pointer-events: none;
+  }
 }
 </style>
