@@ -1,6 +1,7 @@
 ---
 import '../styles/global.css';
-const { title = 'SOTTO IL SOLE', description = 'Italienische Feinkost fuer Haendler, Feinkostgeschaefte, Gastronomie und Concept Stores.' } = Astro.props;
+const { title = 'SOTTO IL SOLE', description = 'Italienische Feinkost fuer Haendler, Feinkostgeschaefte, Gastronomie und Concept Stores.', canonical, ogImage, ogImageAlt, ogType = 'website' } = Astro.props;
+const canonicalUrl = canonical || new URL(Astro.url.pathname, 'https://sottoilsole.de').toString();
 ---
 <!doctype html>
 <html lang="de">
@@ -8,6 +9,15 @@ const { title = 'SOTTO IL SOLE', description = 'Italienische Feinkost fuer Haend
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="description" content={description} />
+    <link rel="canonical" href={canonicalUrl} />
+    <meta property="og:site_name" content="SOTTO IL SOLE" />
+    <meta property="og:type" content={ogType} />
+    <meta property="og:url" content={canonicalUrl} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    {ogImage && <meta property="og:image" content={ogImage} />}
+    {ogImageAlt && <meta property="og:image:alt" content={ogImageAlt} />}
+    <meta name="twitter:card" content={ogImage ? 'summary_large_image' : 'summary'} />
     <title>{title}</title>
   </head>
   <body>

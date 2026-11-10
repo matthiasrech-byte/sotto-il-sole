@@ -43,6 +43,9 @@ interface Product {
   unit?: string;
   basePrice?: string;
   shopButtonText?: string;
+  seoTitle?: string;
+  seoDescription?: string;
+  socialImage?: SanityImage;
 }
 
 export async function getStaticPaths() {
@@ -65,6 +68,9 @@ export async function getStaticPaths() {
       unit,
       basePrice,
       shopButtonText,
+      seoTitle,
+      seoDescription,
+      socialImage,
       "brandInfo": brand->{ name, slug }
     }
   `);
@@ -84,10 +90,14 @@ const brand = product.brandInfo!;
 const detailShortDescription = product.detailShortDescription?.trim() || product.shortDescription;
 const detailDescription = product.detailDescription?.length ? product.detailDescription : product.description;
 const detailFeatures = product.detailFeatures?.length ? product.detailFeatures : product.features;
-const metaDescription = detailShortDescription || `${product.name} von ${brand.name} bei SOTTO IL SOLE entdecken und bestellen.`;
+const pageTitle = product.seoTitle?.trim() || `${product.name} | ${brand.name} | SOTTO IL SOLE`;
+const metaDescription = product.seoDescription?.trim() || detailShortDescription || `${product.name} von ${brand.name} bei SOTTO IL SOLE entdecken und bestellen.`;
+const previewImage = product.socialImage?.asset?._ref ? product.socialImage : product.detailImage;
+const ogImage = previewImage?.asset?._ref ? urlFor(previewImage).width(1200).url() : undefined;
+const canonicalUrl = `https://sottoilsole.de/produkte/${brand.slug.current}-${product.slug.current}/`;
 ---
 
-<BaseLayout title={`${product.name} | ${brand.name} | SOTTO IL SOLE`} description={metaDescription}>
+<BaseLayout title={pageTitle} description={metaDescription} canonical={canonicalUrl} ogImage={ogImage} ogImageAlt={`${product.name} von ${brand.name}`} ogType="product">
   <section class="section product-detail">
     <div class="container">
       <nav class="product-detail__nav" aria-label="Brotkrumennavigation">
