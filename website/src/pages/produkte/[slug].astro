@@ -31,7 +31,7 @@ interface Product {
   category?: string;
   packSize?: string;
   shortDescription?: string;
-  image?: SanityImage;
+  detailImage?: SanityImage;
   description?: PortableTextBlock[];
   features?: string[];
   shopEnabled?: boolean;
@@ -50,7 +50,7 @@ export async function getStaticPaths() {
       category,
       packSize,
       shortDescription,
-      image,
+      "detailImage": coalesce(detailImage, overviewImage, image),
       description,
       features,
       shopEnabled,
@@ -90,17 +90,17 @@ const metaDescription = product.shortDescription || `${product.name} von ${brand
       </nav>
 
       <div class="product-detail__grid">
-        {product.image && (
+        {product.detailImage && (
           <div class="product-detail__media">
             <button
               type="button"
               class="product-detail__zoom"
-              data-zoom-src={urlFor(product.image).width(1800).url()}
+              data-zoom-src={urlFor(product.detailImage).width(1800).url()}
               data-zoom-alt={product.name}
               aria-label={`${product.name} vergrößern`}
             >
               <img
-                src={urlFor(product.image).width(1100).url()}
+                src={urlFor(product.detailImage).width(1100).url()}
                 alt={product.name}
                 loading="eager"
               />

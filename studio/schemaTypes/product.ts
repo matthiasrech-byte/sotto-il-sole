@@ -14,7 +14,21 @@ export const product = defineType({
     defineField({ name: 'category', title: 'Kategorie', type: 'string' }),
     defineField({ name: 'categoryIt', title: 'Kategorie Italienisch', type: 'string' }),
 
-    defineField({ name: 'image', title: 'Produktbild', type: 'image', options: { hotspot: true } }),
+    defineField({
+      name: 'overviewImage',
+      title: 'Produktbild – Übersicht',
+      type: 'image',
+      options: { hotspot: true },
+      description: 'Bild auf der Produzentenseite und in der Produktübersicht.',
+    }),
+    defineField({
+      name: 'detailImage',
+      title: 'Produktbild – Detailseite',
+      type: 'image',
+      options: { hotspot: true },
+      description: 'Großes Bild auf der eigenen Produktseite. Wenn leer, wird das Übersichtsbild angezeigt.',
+    }),
+    defineField({ name: 'image', title: 'Produktbild', type: 'image', options: { hotspot: true }, hidden: true, readOnly: true }),
 
     defineField({ name: 'shortDescription', title: 'Kurzbeschreibung', type: 'text', rows: 3 }),
     defineField({
@@ -41,6 +55,62 @@ export const product = defineType({
       type: 'array',
       of: [{ type: 'string' }],
     }),
+
+defineField({
+  name: 'shopEnabled',
+  title: 'Shop aktiv',
+  type: 'boolean',
+  initialValue: false,
+  description: 'Aktivieren, wenn dieses Produkt auf der Website gekauft werden kann.',
+}),
+
+defineField({
+  name: 'shopifyProductId',
+  title: 'Shopify Produkt-ID',
+  type: 'string',
+  description: 'Die Shopify Produkt-ID, z. B. 11273167864135.',
+  hidden: ({ parent }) => !parent?.shopEnabled,
+}),
+
+defineField({
+  name: 'shopifyVariantId',
+  title: 'Shopify Variant-ID',
+  type: 'string',
+  description: 'Optional. Nur nötig, wenn direkt eine bestimmte Variante gekauft werden soll.',
+  hidden: ({ parent }) => !parent?.shopEnabled,
+}),
+
+defineField({
+  name: 'price',
+  title: 'Verkaufspreis',
+  type: 'string',
+  description: 'Preis wie er auf der Website angezeigt werden soll, z. B. 24,50 €.',
+  hidden: ({ parent }) => !parent?.shopEnabled,
+}),
+
+defineField({
+  name: 'unit',
+  title: 'Einheit / Inhalt',
+  type: 'string',
+  description: 'Zum Beispiel 500 ml.',
+  hidden: ({ parent }) => !parent?.shopEnabled,
+}),
+
+defineField({
+  name: 'basePrice',
+  title: 'Grundpreis',
+  type: 'string',
+  description: 'Zum Beispiel 49,00 €/l.',
+  hidden: ({ parent }) => !parent?.shopEnabled,
+}),
+
+defineField({
+  name: 'shopButtonText',
+  title: 'Buttontext',
+  type: 'string',
+  description: 'Optional. Wenn leer, wird „In den Warenkorb“ verwendet.',
+  hidden: ({ parent }) => !parent?.shopEnabled,
+}),
 
     defineField({ name: 'dataSheet', title: 'PDF-Datenblatt', type: 'file' }),
     defineField({ name: 'sortOrder', title: 'Sortierreihenfolge', type: 'number', initialValue: 0 }),
