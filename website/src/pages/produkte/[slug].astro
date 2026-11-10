@@ -31,9 +31,12 @@ interface Product {
   category?: string;
   packSize?: string;
   shortDescription?: string;
+  detailShortDescription?: string;
   detailImage?: SanityImage;
   description?: PortableTextBlock[];
+  detailDescription?: PortableTextBlock[];
   features?: string[];
+  detailFeatures?: string[];
   shopEnabled?: boolean;
   shopifyProductId?: string;
   price?: string;
@@ -50,9 +53,12 @@ export async function getStaticPaths() {
       category,
       packSize,
       shortDescription,
+      detailShortDescription,
       "detailImage": coalesce(detailImage, overviewImage, image),
       description,
+      detailDescription,
       features,
+      detailFeatures,
       shopEnabled,
       shopifyProductId,
       price,
@@ -75,7 +81,10 @@ export async function getStaticPaths() {
 
 const { product } = Astro.props as { product: Product };
 const brand = product.brandInfo!;
-const metaDescription = product.shortDescription || `${product.name} von ${brand.name} bei SOTTO IL SOLE entdecken und bestellen.`;
+const detailShortDescription = product.detailShortDescription?.trim() || product.shortDescription;
+const detailDescription = product.detailDescription?.length ? product.detailDescription : product.description;
+const detailFeatures = product.detailFeatures?.length ? product.detailFeatures : product.features;
+const metaDescription = detailShortDescription || `${product.name} von ${brand.name} bei SOTTO IL SOLE entdecken und bestellen.`;
 ---
 
 <BaseLayout title={`${product.name} | ${brand.name} | SOTTO IL SOLE`} description={metaDescription}>
@@ -123,8 +132,8 @@ const metaDescription = product.shortDescription || `${product.name} von ${brand
             </p>
           )}
           <h1>{product.name}</h1>
-          {product.shortDescription && (
-            <p class="product-detail__lead">{product.shortDescription}</p>
+          {detailShortDescription && (
+            <p class="product-detail__lead">{detailShortDescription}</p>
           )}
 
           {product.shopEnabled && product.shopifyProductId && (
@@ -137,9 +146,9 @@ const metaDescription = product.shortDescription || `${product.name} von ${brand
             />
           )}
 
-          {product.description && product.description.length > 0 && (
+          {detailDescription && detailDescription.length > 0 && (
             <div class="product-detail__description">
-              {product.description.map((block) => (
+              {detailDescription.map((block) => (
                 block._type === 'block' && (
                   <p>
                     {block.children?.map((child) => (
@@ -155,9 +164,9 @@ const metaDescription = product.shortDescription || `${product.name} von ${brand
             </div>
           )}
 
-          {product.features && product.features.length > 0 && (
+          {detailFeatures && detailFeatures.length > 0 && (
             <ul class="product-detail__features">
-              {product.features.map((feature) => <li>{feature}</li>)}
+              {detailFeatures.map((feature) => <li>{feature}</li>)}
             </ul>
           )}
           <a class="product-detail__back" href={`/marken/${brand.slug.current}`}>
