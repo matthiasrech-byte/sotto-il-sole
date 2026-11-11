@@ -156,6 +156,13 @@ const canonicalUrl = `https://sottoilsole.de/produkte/${brand.slug.current}-${pr
             />
           )}
 
+          {brand.slug.current === 'ciccolella-olivenoel' && product.shopEnabled && product.shopifyProductId && (
+            <div class="product-detail__shipping">
+              <p><strong>Versandkosten:</strong> 5,99 €</p>
+              <p><strong>Lieferzeit:</strong> 3–5 Tage</p>
+            </div>
+          )}
+
           {detailDescription && detailDescription.length > 0 && (
             <div class="product-detail__description">
               {detailDescription.map((block) => (
@@ -377,5 +384,19 @@ const canonicalUrl = `https://sottoilsole.de/produkte/${brand.slug.current}-${pr
     .product-detail__grid { grid-template-columns: 1fr; }
     .product-detail__nav { margin-bottom: 1.5rem; }
     .product-detail__zoom-icon { opacity: 1; visibility: visible; }
+  }
+  .product-detail__shipping {
+    margin-top: 1.25rem;
+    padding-top: 1rem;
+    border-top: 1px solid rgba(0, 53, 20, 0.14);
+    color: var(--color-green-dark);
+    font-size: 0.9rem;
+    line-height: 1.6;
+  }
+  .product-detail__shipping p {
+    margin: 0.2rem 0;
+  }
+  .product-detail__shipping strong {
+    font-weight: 900;
   }
 </style>
