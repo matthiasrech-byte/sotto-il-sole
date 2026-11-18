@@ -218,6 +218,42 @@ const canonicalUrl = `https://sottoilsole.de/produkte/${brand.slug.current}-${pr
     });
     dialog?.addEventListener('close', () => image?.removeAttribute('src'));
   </script>
+
+  <!-- SOTTO_TRACKING_VIEW_ITEM_V1: Lokale Diagnose, kein Pixel -->
+  <div
+    id="sotto-tracking-product"
+    hidden
+    data-shopify-id={product.shopifyProductId}
+    data-product-name={product.name}
+    data-product-brand={brand.name}
+    data-product-price={product.price || ''}
+  ></div>
+  <script>
+    (function () {
+      var node = document.getElementById('sotto-tracking-product');
+      if (!node || !node.dataset.shopifyId) return;
+      var rawPrice = (node.dataset.productPrice || '').replace(/[^0-9,.]/g, '');
+      var amount = Number(rawPrice.replace(/\./g, '').replace(',', '.'));
+      var item = {
+        item_id: String(node.dataset.shopifyId),
+        item_name: node.dataset.productName || '',
+        item_brand: node.dataset.productBrand || '',
+        quantity: 1
+      };
+      if (Number.isFinite(amount) && amount > 0) item.price = amount;
+      var ecommerce = { currency: 'EUR', items: [item] };
+      if (item.price !== undefined) ecommerce.value = item.price;
+      var event = { event: 'view_item', ecommerce: ecommerce };
+      window.sottoTrackingEvents = window.sottoTrackingEvents || [];
+      window.sottoTrackingEvents.push(event);
+      // Nur nach expliziter Consent-Anbindung! Noch kein Tag/Pixel installiert.
+      if (window.sottoTrackingEnabled === true) {
+        window.dataLayer = window.dataLayer || [];
+        window.dataLayer.push({ ecommerce: null });
+        window.dataLayer.push(event);
+      }
+    })();
+  </script>
 </BaseLayout>
 
 <style>

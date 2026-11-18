@@ -23,5 +23,6 @@ const canonicalUrl = canonical || new URL(Astro.url.pathname, 'https://sottoilso
   </head>
   <body>
     <slot />
+    <script is:inline src="/sotto-meta-bridge.js"></script>
   </body>
 </html>

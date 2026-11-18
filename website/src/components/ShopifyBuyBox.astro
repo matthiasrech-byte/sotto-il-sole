@@ -82,6 +82,57 @@ const componentId = `shopify-buy-${shopifyProductId}`;
         moneyFormat: '%E2%82%AC%7B%7Bamount_with_comma_separator%7D%7D',
         options: {
           product: {
+            // SOTTO_TRACKING_CART_SUCCESS_V1: zaehlt erst nach erfolgreichem Shopify-Update.
+            events: {
+              afterInit: function (component) {
+                if (!component || !component.cart || !component.model) return;
+                window.SottoShopify = window.SottoShopify || {};
+                var store = window.SottoShopify;
+                store.trackingVariants = store.trackingVariants || {};
+                var productInfo = {
+                  id: String(shopifyProductId),
+                  name: component.model.title || '',
+                  brand: component.model.vendor || ''
+                };
+                (component.model.variants || []).forEach(function (variant) {
+                  store.trackingVariants[String(variant.id)] = productInfo;
+                });
+                var cart = component.cart;
+                if (cart.__sottoTrackingWrapped) return;
+                cart.__sottoTrackingWrapped = true;
+                var originalAdd = cart.addVariantToCart;
+                cart.addVariantToCart = function (variant, quantity, openCart) {
+                  var result = originalAdd.call(this, variant, quantity, openCart);
+                  if (!result || typeof result.then !== 'function') return result;
+                  return result.then(function (checkout) {
+                    var qty = Number(quantity);
+                    if (!Number.isFinite(qty) || qty <= 0) qty = 1;
+                    var price = Number(variant && variant.priceV2 && variant.priceV2.amount);
+                    var info = store.trackingVariants[String(variant.id)] || {};
+                    var item = {
+                      item_id: info.id || String(variant.id),
+                      item_name: info.name || '',
+                      item_brand: info.brand || '',
+                      item_variant: String(variant.id).split('/').pop(),
+                      quantity: qty
+                    };
+                    if (Number.isFinite(price) && price >= 0) item.price = price;
+                    var ecommerce = { currency: 'EUR', items: [item] };
+                    if (item.price !== undefined) ecommerce.value = Math.round(item.price * qty * 100) / 100;
+                    var event = { event: 'add_to_cart', ecommerce: ecommerce };
+                    window.sottoTrackingEvents = window.sottoTrackingEvents || [];
+                    window.sottoTrackingEvents.push(event);
+                    // Ohne Consent-Anbindung ausschliesslich lokaler Diagnose-Eintrag.
+                    if (window.sottoTrackingEnabled === true) {
+                      window.dataLayer = window.dataLayer || [];
+                      window.dataLayer.push({ ecommerce: null });
+                      window.dataLayer.push(event);
+                    }
+                    return checkout;
+                  });
+                };
+              }
+            },
             contents: {
               img: false,
               title: false,
