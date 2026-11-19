@@ -1,8 +1,8 @@
 ---
 import '../styles/global.css';
-// Google tags stay inactive until IDs are configured in Netlify/environment.
-const ga4Id = /^G-[A-Z0-9]+$/.test(import.meta.env.PUBLIC_GA4_MEASUREMENT_ID || '')
-  ? import.meta.env.PUBLIC_GA4_MEASUREMENT_ID : '';
+// Public GA4 ID for SOTTO IL SOLE. A Netlify variable can override it.
+const configuredGa4Id = import.meta.env.PUBLIC_GA4_MEASUREMENT_ID || 'G-67V1WZE1X9';
+const ga4Id = /^G-[A-Z0-9]+$/.test(configuredGa4Id) ? configuredGa4Id : '';
 const adsId = /^AW-[0-9]+$/.test(import.meta.env.PUBLIC_GOOGLE_ADS_ID || '')
   ? import.meta.env.PUBLIC_GOOGLE_ADS_ID : '';
 const { title = 'SOTTO IL SOLE', description = 'Italienische Feinkost fuer Haendler, Feinkostgeschaefte, Gastronomie und Concept Stores.', canonical, ogImage, ogImageAlt, ogType = 'website' } = Astro.props;
