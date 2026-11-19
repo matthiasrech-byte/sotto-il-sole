@@ -22,6 +22,7 @@
   var ga4Configured = false;
   var adsConfigured = false;
   var viewItemSent = false;
+  var previousConsent = getConsent();
 
   function getConsent() {
     var choices = window.Cookiebot && window.Cookiebot.consent;
@@ -95,6 +96,12 @@
 
   function syncConsent() {
     var consent = getConsent();
+    // Already-loaded Google tags cannot be reliably unloaded in place.
+    // On consent withdrawal, update Consent Mode immediately, then reload
+    // to return to a no-tag state (mirrors the Meta bridge behaviour).
+    var revoked = (previousConsent.statistics && !consent.statistics) ||
+      (previousConsent.marketing && !consent.marketing);
+    previousConsent = consent;
     // Cookiebot also integrates with Google Consent Mode; these explicit
     // updates keep this bridge in sync when consent is changed after load.
     window.gtag('consent', 'update', {
@@ -115,6 +122,10 @@
       ensureGoogleTag(adsId);
       adsConfigured = true;
       window.gtag('config', adsId);
+    }
+    if (revoked) {
+      window.location.reload();
+      return;
     }
     sendCurrentProductView();
   }
