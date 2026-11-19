@@ -3,9 +3,11 @@
 The Astro website and Shopify checkout are two separate systems.
 
 ## Astro storefront
-- Set `PUBLIC_GA4_MEASUREMENT_ID=G-...` in Netlify to activate GA4.
+- The public GA4 ID is configured in the Astro layout: `G-67V1WZE1X9`.
+- To override the GA4 ID without another code edit, set `PUBLIC_GA4_MEASUREMENT_ID=G-...` in Netlify.
 - Optionally set `PUBLIC_GOOGLE_ADS_ID=AW-...` for the Google Ads tag.
-- Redeploy the Astro website after adding environment variables.
+- Changes to the Astro layout or Netlify environment variables require a redeploy.
+- No Google Tag Manager (GTM-) container is installed through this integration. Do not add an overlapping `gtm.js` snippet.
 - Cookiebot is the CMP. The Google Consent Mode v2 **default is denied**
   before Cookiebot loads. The Google tag is loaded only if the relevant
   Cookiebot category is granted (statistics for GA4, marketing for Ads).
@@ -35,5 +37,6 @@ The Astro website and Shopify checkout are two separate systems.
 5. Start checkout and place a test order: Shopify produces only one Purchase
    conversion with correct value and currency in the intended Google account.
 6. Validate using Google Tag Assistant, GA4 DebugView, and Google Ads conversion diagnostics.
-7. Update/review BOTH German and Italian privacy notices before activation;
-   Google Analytics and Ads are not yet described in the existing notices.
+7. Draft disclosures for Google Analytics are included in BOTH German and Italian privacy notices;
+   review the wording with your legal/privacy adviser before activation.
+   If Google Ads tracking is activated later, update both disclosures accordingly.
