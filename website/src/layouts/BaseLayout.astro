@@ -1,11 +1,33 @@
 ---
 import '../styles/global.css';
+// Google tags stay inactive until IDs are configured in Netlify/environment.
+const ga4Id = /^G-[A-Z0-9]+$/.test(import.meta.env.PUBLIC_GA4_MEASUREMENT_ID || '')
+  ? import.meta.env.PUBLIC_GA4_MEASUREMENT_ID : '';
+const adsId = /^AW-[0-9]+$/.test(import.meta.env.PUBLIC_GOOGLE_ADS_ID || '')
+  ? import.meta.env.PUBLIC_GOOGLE_ADS_ID : '';
 const { title = 'SOTTO IL SOLE', description = 'Italienische Feinkost fuer Haendler, Feinkostgeschaefte, Gastronomie und Concept Stores.', canonical, ogImage, ogImageAlt, ogType = 'website' } = Astro.props;
 const canonicalUrl = canonical || new URL(Astro.url.pathname, 'https://sottoilsole.de').toString();
 ---
 <!doctype html>
 <html lang="de">
   <head>
+    <!-- Set Google Consent Mode v2 defaults synchronously before Cookiebot/Google tags. -->
+    <script is:inline data-cookieconsent="ignore">
+      window.dataLayer = window.dataLayer || [];
+      window.gtag = window.gtag || function () { window.dataLayer.push(arguments); };
+      window.gtag('consent', 'default', {
+        ad_storage: 'denied',
+        ad_user_data: 'denied',
+        ad_personalization: 'denied',
+        analytics_storage: 'denied',
+        functionality_storage: 'denied',
+        personalization_storage: 'denied',
+        security_storage: 'granted',
+        wait_for_update: 500
+      });
+      window.gtag('set', 'ads_data_redaction', true);
+      window.gtag('set', 'url_passthrough', false);
+    </script>
     <script is:inline id="Cookiebot" src="https://consent.cookiebot.com/uc.js" data-cbid="7e6efd25-5ca3-4771-94f8-461a1d74e0a6" data-blockingmode="auto" type="text/javascript"></script>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -24,5 +46,6 @@ const canonicalUrl = canonical || new URL(Astro.url.pathname, 'https://sottoilso
   <body>
     <slot />
     <script is:inline src="/sotto-meta-bridge.js"></script>
+    <script is:inline data-cookieconsent="ignore" src="/sotto-google-bridge.js" data-ga4-id={ga4Id} data-ads-id={adsId}></script>
   </body>
 </html>
