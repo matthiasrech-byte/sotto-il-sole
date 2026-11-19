@@ -49,6 +49,9 @@
     }
 
     window.fbq('init', PIXEL_ID);
+    // This bridge only starts once Cookiebot has allowed marketing cookies.
+    // Explicitly pass that consent on to Meta before sending PageView.
+    window.fbq('consent', 'grant');
     pixelStarted = true;
     window.fbq('trackSingle', PIXEL_ID, 'PageView');
   }
@@ -104,8 +107,9 @@
     var allowed = hasMarketingConsent();
     if (!allowed) {
       if (marketingWasAllowed) {
-        // A previously loaded Meta library cannot be safely unloaded; a
-        // reload ensures no further auto events occur after revocation.
+        // Revoke Meta consent immediately; reloading then removes the already
+        // loaded library so it cannot emit events after consent withdrawal.
+        if (window.fbq) window.fbq('consent', 'revoke');
         window.location.reload();
       }
       return;
