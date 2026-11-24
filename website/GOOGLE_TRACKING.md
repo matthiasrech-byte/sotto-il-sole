@@ -3,7 +3,7 @@
 The Astro website and Shopify checkout are two separate systems.
 
 ## Astro storefront
-- The public GA4 ID is configured in the Astro layout: `G-67V1WZE1X9`.
+- The public GA4 ID is configured in the Astro layout: `G-V28JFQXH9Q`.
 - To override the GA4 ID without another code edit, set `PUBLIC_GA4_MEASUREMENT_ID=G-...` in Netlify.
 - Optionally set `PUBLIC_GOOGLE_ADS_ID=AW-...` for the Google Ads tag.
 - Changes to the Astro layout or Netlify environment variables require a redeploy.
