@@ -6,8 +6,11 @@ The Shopify storefront is password protected; the public Astro product landing
 pages are on sottoilsole.de. Do not disable Shopify's password protection solely
 to satisfy the Google & YouTube app's product sync setup.
 
-Source: Netlify function in netlify/functions/google-merchant-feed.mjs.
-Public XML feed: https://sottoilsole.de/google-products.xml.
+Sources:
+- Astro build-time JSON: website/src/pages/merchant-catalog.json.ts
+  -> https://sottoilsole.de/merchant-catalog.json
+- Netlify function: website/netlify/functions/google-merchant-feed.mjs
+  -> https://sottoilsole.de/google-products.xml
 
 - The function reads active Ciccolella listings in Sanity, matching the website
   product-detail route logic.
@@ -23,8 +26,10 @@ Public XML feed: https://sottoilsole.de/google-products.xml.
 ## Environment / hosting
 Netlify site's base directory must be website. Its default functions
 directory then resolves to website/netlify/functions.
-The runtime uses the existing PUBLIC_SANITY_PROJECT_ID and
-PUBLIC_SANITY_DATASET environment variables. Optionally define
+The Astro build uses the existing PUBLIC_SANITY_PROJECT_ID and
+PUBLIC_SANITY_DATASET to generate merchant-catalog.json at build time.
+The Netlify function fetches this same-site JSON endpoint; it does NOT
+require Sanity variables at function runtime. Optionally define
 SHOPIFY_STOREFRONT_ACCESS_TOKEN; the default token is the public Storefront
 token already used by the website's Shopify Buy Button.
 
@@ -56,3 +61,9 @@ merging, and validate the production feed after merging.
 - Feeds are read by Google daily, inventory/price updates are looked up live
   when fetched, but updates in Merchant Center are not instantaneous.
 - This is a product DATA feed, not a purchase tracker or a separate storefront.
+
+## Diagnostics
+If google-products.xml responds HTTP 503, its plain-text body includes
+CATALOG (cannot load the Astro-built catalog), SHOPIFY (Storefront API
+unavailable / query failed), or PRODUCT_DATA (price/image/variant data
+incomplete). Do not add a failing feed URL to Merchant Center.
