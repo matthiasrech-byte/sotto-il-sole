@@ -1,0 +1,176 @@
+/*
+ * Merchant Center RSS 2.0 feed for the public Ciccolella product detail pages.
+ * Sanity: titles/descriptions/images/routes. Shopify Storefront: live EUR price,
+ * stock availability and GTIN. There is intentionally no Shopify storefront URL.
+ *
+ * Public feed URL: https://sottoilsole.de/google-products.xml
+ * Google may fetch it daily. No checkout / cart / pixel configuration is changed.
+ *
+ * Existing PUBLIC_SANITY_PROJECT_ID and PUBLIC_SANITY_DATASET are used at runtime.
+ * A separate SHOPIFY_STOREFRONT_ACCESS_TOKEN can override the existing public
+ * Storefront access token used by the Shopify Buy Button.
+ */
+const STORE_DOMAIN = 'ppqtf1-wz.myshopify.com';
+const PUBLIC_STOREFRONT_TOKEN = 'b006ff3021dbdd2ee5871705ca610814';
+const SITE = 'https://sottoilsole.de';
+const GROQ = '*[_type == "product" && shopEnabled == true && defined(shopifyProductId) && defined(slug.current) && brand->slug.current == "ciccolella-olivenoel"] | order(name asc) { name, "slug": slug.current, "shopifyProductId": shopifyProductId, "brandName": brand->name, "brandSlug": brand->slug.current, "description": coalesce(detailShortDescription, shortDescription, seoDescription), "imageUrl": coalesce(detailImage.asset->url, overviewImage.asset->url, image.asset->url), packSize }';
+
+function xml(value) {
+  return String(value ?? '').replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F]/g, '').replace(/[&<>"']/g, function (character) {
+    return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&apos;' }[character];
+  });
+}
+
+async function fetchJson(url, options = {}) {
+  const res = await fetch(url, { ...options, signal: AbortSignal.timeout(10000) });
+  if (!res.ok) throw new Error('Upstream data source HTTP ' + res.status);
+  return res.json();
+}
+
+async function getSanityProducts() {
+  const projectId = process.env.PUBLIC_SANITY_PROJECT_ID;
+  const dataset = process.env.PUBLIC_SANITY_DATASET || 'production';
+  if (!projectId || !/^[a-z0-9-]+$/i.test(projectId) || !/^[a-z0-9_-]+$/i.test(dataset)) {
+    throw new Error('Sanity configuration missing or invalid');
+  }
+  const url = 'https://' + projectId + '.api.sanity.io/v2026-06-11/data/query/' +
+    encodeURIComponent(dataset) + '?query=' + encodeURIComponent(GROQ);
+  const json = await fetchJson(url);
+  if (!Array.isArray(json.result) || json.result.length === 0) {
+    throw new Error('No eligible Ciccolella products returned by Sanity');
+  }
+  return json.result;
+}
+
+function productGid(value) {
+  const id = String(value || '').trim();
+  if (/^gid:\/\/shopify\/Product\/[0-9]+$/.test(id)) return id;
+  if (/^[0-9]+$/.test(id)) return 'gid://shopify/Product/' + id;
+  throw new Error('Invalid Shopify product ID in Sanity');
+}
+
+async function getShopifyProducts(products) {
+  const accessToken = process.env.SHOPIFY_STOREFRONT_ACCESS_TOKEN || PUBLIC_STOREFRONT_TOKEN;
+  const query = [
+    'query MerchantProducts($ids: [ID!]!) @inContext(country: DE) {',
+    '  nodes(ids: $ids) {',
+    '    ... on Product {',
+    '      id title vendor',
+    '      variants(first: 2) { nodes { id availableForSale barcode',
+    '        price { amount currencyCode } } }',
+    '    }',
+    '  }',
+    '}'
+  ].join('\n');
+  const json = await fetchJson('https://' + STORE_DOMAIN + '/api/2026-10/graphql.json', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-Shopify-Storefront-Access-Token': accessToken,
+    },
+    body: JSON.stringify({
+      query,
+      variables: { ids: products.map(function (product) { return productGid(product.shopifyProductId); }) }
+    })
+  });
+  if (Array.isArray(json.errors) && json.errors.length) {
+    throw new Error('Shopify Storefront GraphQL returned an error');
+  }
+  if (!json.data || !Array.isArray(json.data.nodes) || json.data.nodes.length !== products.length) {
+    throw new Error('Shopify did not return the requested product list');
+  }
+  return json.data.nodes;
+}
+
+function toFeedItems(products, shopifyNodes) {
+  const items = [];
+  for (let i = 0; i < products.length; i++) {
+    const item = products[i];
+    const shopify = shopifyNodes[i];
+    if (!shopify || !shopify.variants || !Array.isArray(shopify.variants.nodes)) {
+      throw new Error('Shopify product missing or not published to Storefront API');
+    }
+    if (shopify.variants.nodes.length !== 1) {
+      // The existing Astro Buy Button hides the variant selector. We must not
+      // advertise variant-specific prices without a corresponding landing page.
+      throw new Error('Product has multiple Shopify variants; needs landing-page variant mapping');
+    }
+    const variant = shopify.variants.nodes[0];
+    const amount = Number(variant.price && variant.price.amount);
+    if (!Number.isFinite(amount) || amount < 0 || variant.price.currencyCode !== 'EUR') {
+      throw new Error('Shopify product price is missing or is not in EUR');
+    }
+    const image = String(item.imageUrl || '');
+    const slug = String(item.slug || '');
+    const brandSlug = String(item.brandSlug || '');
+    if (!/^https:\/\/.+/i.test(image) || !/^[a-z0-9-]+$/i.test(slug) ||
+        !/^[a-z0-9-]+$/i.test(brandSlug) || !item.name || !item.brandName) {
+      throw new Error('Incomplete title, image or URL data in Sanity');
+    }
+    const brand = String(item.brandName).trim();
+    const productName = String(item.name).trim();
+    const title = productName.toLocaleLowerCase('de-DE').includes(brand.toLocaleLowerCase('de-DE'))
+      ? productName : brand + ' – ' + productName;
+    const description = String(item.description || productName).trim();
+    const gtin = String(variant.barcode || '').replace(/[\s-]/g, '');
+    const id = String(variant.id || '').split('/').pop();
+
+    const lines = [
+      '    <item>',
+      '      <g:id>' + xml(id) + '</g:id>',
+      '      <g:title>' + xml(title) + '</g:title>',
+      '      <g:description>' + xml(description) + '</g:description>',
+      '      <g:link>' + xml(SITE + '/produkte/' + brandSlug + '-' + slug + '/') + '</g:link>',
+      '      <g:image_link>' + xml(image) + '</g:image_link>',
+      '      <g:price>' + xml(amount.toFixed(2) + ' EUR') + '</g:price>',
+      '      <g:availability>' + (variant.availableForSale ? 'in_stock' : 'out_of_stock') + '</g:availability>',
+      '      <g:condition>new</g:condition>',
+      '      <g:brand>' + xml(brand) + '</g:brand>',
+    ];
+    if (/^[0-9]{8,14}$/.test(gtin)) lines.push('      <g:gtin>' + xml(gtin) + '</g:gtin>');
+    lines.push('    </item>');
+    items.push(lines.join('\n'));
+  }
+  return items;
+}
+
+export default async function handler(req) {
+  if (req.method !== 'GET' && req.method !== 'HEAD') {
+    return new Response('Method not allowed', { status: 405, headers: { Allow: 'GET, HEAD' } });
+  }
+  try {
+    const products = await getSanityProducts();
+    const shopify = await getShopifyProducts(products);
+    const items = toFeedItems(products, shopify);
+    const feed = [
+      '<?xml version="1.0" encoding="UTF-8"?>',
+      '<rss version="2.0" xmlns:g="http://base.google.com/ns/1.0">',
+      '  <channel>',
+      '    <title>SOTTO IL SOLE – Ciccolella Olivenöl</title>',
+      '    <link>' + SITE + '</link>',
+      '    <description>Produktdatenquelle für das Google Merchant Center</description>',
+      items.join('\n'),
+      '  </channel>',
+      '</rss>',
+      ''
+    ].join('\n');
+    return new Response(req.method === 'HEAD' ? null : feed, {
+      status: 200,
+      headers: {
+        'Content-Type': 'application/xml; charset=utf-8',
+        'Cache-Control': 'public, max-age=0, s-maxage=900',
+        'X-Content-Type-Options': 'nosniff'
+      }
+    });
+  } catch (error) {
+    console.error('Merchant feed unavailable:', error instanceof Error ? error.message : 'unknown error');
+    // Returning a non-200 status prevents Google from importing an incomplete
+    // or empty list on transient upstream failures.
+    return new Response('Product feed temporarily unavailable', {
+      status: 503,
+      headers: { 'Content-Type': 'text/plain; charset=utf-8', 'Cache-Control': 'no-store' }
+    });
+  }
+}
+
+export const config = { path: '/google-products.xml' };
