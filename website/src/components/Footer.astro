@@ -14,15 +14,19 @@ const copy = isItalian
       legalLabel: 'Informazioni legali',
       imprint: 'Note legali',
       privacy: 'Privacy',
+      withdrawal: 'Recesso (DE)',
       imprintHref: '/it/impressum',
       privacyHref: '/it/datenschutz',
+      withdrawalHref: '/widerruf',
     }
   : {
       legalLabel: 'Rechtliches',
       imprint: 'Impressum',
       privacy: 'Datenschutz',
+      withdrawal: 'Widerruf',
       imprintHref: '/impressum',
       privacyHref: '/datenschutz',
+      withdrawalHref: '/widerruf',
     };
 ---
 
@@ -35,6 +39,7 @@ const copy = isItalian
     <nav aria-label={copy.legalLabel}>
       <a href={copy.imprintHref}>{copy.imprint}</a>
       <a href={copy.privacyHref}>{copy.privacy}</a>
+      <a href={copy.withdrawalHref}>{copy.withdrawal}</a>
     </nav>
   </div>
 </footer>
@@ -63,8 +68,9 @@ const copy = isItalian
   .footer nav {
     display: flex;
     justify-content: flex-end;
-    gap: 1rem;
-    white-space: nowrap;
+    gap: 0.5rem 1rem;
+    flex-wrap: wrap;
+    white-space: normal;
   }
 
   .footer a {
