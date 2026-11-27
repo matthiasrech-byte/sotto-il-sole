@@ -67,3 +67,19 @@ If google-products.xml responds HTTP 503, its plain-text body includes
 CATALOG (cannot load the Astro-built catalog), SHOPIFY (Storefront API
 unavailable / query failed), or PRODUCT_DATA (price/image/variant data
 incomplete). Do not add a failing feed URL to Merchant Center.
+
+## Unit pricing for olive oils
+The Sanity build-time catalog includes both `unit` (visible on detail pages)
+and `packSize`. The Netlify XML feed extracts a single unambiguous bottle
+volume and emits both `g:unit_pricing_measure` and
+`g:unit_pricing_base_measure` (1 litre). If both fields contain different
+volumes, the feed returns HTTP 503 instead of inventing an amount.
+
+Multipacks (for example, the Degustations-Set) are intentionally excluded from
+the single-bottle volume parser. They need an explicitly verified total
+quantity if Merchant Center requires a reference unit price for the set.
+
+After deployment verify the public XML contains both unit pricing attributes
+for the Cagnara and Cru di Puglia bottles, matching the displayed volumes on
+their product pages. Merchant Center may take 24-72 h after the scheduled
+refresh to clear a prior unit-pricing warning.
