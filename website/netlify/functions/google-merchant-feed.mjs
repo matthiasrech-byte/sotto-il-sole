@@ -76,6 +76,42 @@ async function getShopifyProducts(products) {
   return json.data.nodes;
 }
 
+
+function parseSingleVolumeLiters(raw) {
+  const value = String(raw || '').trim();
+  if (!value) return null;
+
+  // A multipack (e.g. "3 x 100 ml") needs the TOTAL net content; don't
+  // mistake the individual bottle size for the whole product quantity.
+  if (/\b\d+\s*[x×]\s*\d/i.test(value)) return null;
+
+  const matches = [...value.matchAll(/(\d+(?:[,.]\d+)?)\s*(ml|cl|l)\b/gi)];
+  if (matches.length !== 1) return null;
+
+  const number = Number(matches[0][1].replace(',', '.'));
+  const unit = matches[0][2].toLowerCase();
+  const liters = unit === 'ml' ? number / 1000 : unit === 'cl' ? number / 100 : number;
+  return Number.isFinite(liters) && liters > 0 ? liters : null;
+}
+
+function unitPriceQuantity(item) {
+  // Mixed-format sample sets require a separately documented total volume.
+  // Do not apply the single-bottle size to a Degustations-Set.
+  if (/\b(set|degustations|probierpaket|paket)\b/i.test(String(item.name || ''))) return null;
+
+  const displayedUnit = parseSingleVolumeLiters(item.unit);
+  const packSize = parseSingleVolumeLiters(item.packSize);
+  if (displayedUnit && packSize && Math.abs(displayedUnit - packSize) > 0.00001) {
+    throw new Error('Unit and package volume disagree for a product');
+  }
+  const liters = displayedUnit || packSize;
+  if (!liters) return null;
+
+  // The reference base of 1 litre is valid for food sold by volume in Germany.
+  // Use the SAME unit (l) on both Google attributes for consistency.
+  return String(Number(liters.toFixed(6))) + 'l';
+}
+
 function toFeedItems(products, shopifyNodes) {
   const items = [];
   for (let i = 0; i < products.length; i++) {
@@ -122,6 +158,11 @@ function toFeedItems(products, shopifyNodes) {
       '      <g:brand>' + xml(brand) + '</g:brand>',
     ];
     if (/^[0-9]{8,14}$/.test(gtin)) lines.push('      <g:gtin>' + xml(gtin) + '</g:gtin>');
+    const quantity = unitPriceQuantity(item);
+    if (quantity) {
+      lines.push('      <g:unit_pricing_measure>' + xml(quantity) + '</g:unit_pricing_measure>');
+      lines.push('      <g:unit_pricing_base_measure>1l</g:unit_pricing_base_measure>');
+    }
     lines.push('    </item>');
     items.push(lines.join('\n'));
   }
