@@ -13,7 +13,8 @@ const query = `*[_type == "product" && shopEnabled == true && defined(shopifyPro
   "brandSlug": brand->slug.current,
   "description": coalesce(detailShortDescription, shortDescription, seoDescription),
   "imageUrl": coalesce(detailImage.asset->url, overviewImage.asset->url, image.asset->url),
-  packSize
+  packSize,
+  unit
 }`;
 
 export const GET: APIRoute = async () => {
